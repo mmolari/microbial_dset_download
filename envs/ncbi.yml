@@ -1,0 +1,8 @@
+name: ncbi
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ca-certificates=2024.6.2
+  - ncbi-datasets-cli=16.22.0
+prefix: /home/marco/miniconda3/envs/ncbi
