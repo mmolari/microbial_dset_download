@@ -131,9 +131,23 @@ rule mash_dist:
         """
 
 
+rule mlst:
+    input:
+        rules.chromosome_fa.output,
+    output:
+        "results/mlst.tsv",
+    conda:
+        "envs/mlst.yml"
+    shell:
+        """
+        mlst --scheme saureus {input}/*.fa > {output}
+        """
+
+
 rule all:
     input:
         # rules.download_summary.output,
         rules.chromosome_fa.output,
         rules.info_to_tsv.output,
+        rules.mlst.output,
         expand(rules.mash_dist.output, ref=ref_dict.keys()),
