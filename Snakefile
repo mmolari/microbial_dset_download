@@ -22,6 +22,19 @@ rule download_ref:
         """
 
 
+rule ref_to_chromosome:
+    input:
+        lambda w: expand(rules.download_ref.output, r_acc=ref_dict[w.ref]),
+    output:
+        "data/ref_chromosome/{ref}.fa",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/extract_chromosome.py --fa {input} --out_file {output}
+        """
+
+
 # rule download_summary:
 #     output:
 #         "data/summary_info.json"
@@ -104,9 +117,23 @@ rule chromosome_fa:
         """
 
 
+rule mash_dist:
+    input:
+        fas=rules.chromosome_fa.output,
+        ref=rules.ref_to_chromosome.output,
+    output:
+        "results/mash_dist/{ref}.tsv",
+    conda:
+        "envs/mash.yml"
+    shell:
+        """
+        mash dist -s 10000 {input.ref} {input.fas}/*.fa > {output}
+        """
+
+
 rule all:
     input:
         # rules.download_summary.output,
         rules.chromosome_fa.output,
         rules.info_to_tsv.output,
-        expand("data/ref/{r_acc}.fa", r_acc=ref_dict.values()),
+        expand(rules.mash_dist.output, ref=ref_dict.keys()),

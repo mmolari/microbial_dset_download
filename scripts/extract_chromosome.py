@@ -6,7 +6,8 @@ from Bio import SeqIO
 def parse_args():
     parser = argparse.ArgumentParser(description="Extract chromosome from a genome")
     parser.add_argument("--fa", type=str, help="input genome file")
-    parser.add_argument("--out_dir", type=str, help="output chromosome file")
+    parser.add_argument("--out_dir", type=str, help="output chromosome folder")
+    parser.add_argument("--out_file", type=str, help="output chromosome file")
     return parser.parse_args()
 
 
@@ -25,6 +26,10 @@ if __name__ == "__main__":
     # format id and description
     r.id = r.id.split()[0]
     r.description = ""
-    fname = pathlib.Path(args.out_dir) / f"{r.id}.fa"
+
+    if args.out_file is not None:
+        fname = pathlib.Path(args.out_file)
+    else:
+        fname = pathlib.Path(args.out_dir) / f"{r.id}.fa"
     with open(fname, "w") as f:
         SeqIO.write(r, f, "fasta")
