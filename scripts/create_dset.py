@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument("--out_dir", type=str)
     parser.add_argument("--out_mtd", type=str)
     parser.add_argument("--out_mlst", type=str)
+    parser.add_argument("--out_acc_map", type=str)
     return parser.parse_args()
 
 
@@ -50,9 +51,10 @@ if __name__ == "__main__":
     acc_df.set_index("chromosome_acc", inplace=True)
     isolates = [i.removesuffix(".fa") for i in isolates]
     assembly_acc = acc_df.loc[isolates, "assembly_acc"].values
+    acc_df.loc[isolates].to_csv(args.out_acc_map, sep="\t")
 
     # load and select metadata
-    mtd = pd.read_csv(args.mtd, sep="\t")
+    mtd = pd.read_csv(args.mtd, sep="\t", low_memory=False)
     mtd.set_index("Assembly Accession", inplace=True)
     mtd = mtd.loc[assembly_acc]
 

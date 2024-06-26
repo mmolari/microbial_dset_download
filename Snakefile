@@ -222,6 +222,7 @@ rule create_dset:
         seqs=directory("results/datasets/{dset}/fa"),
         mtd="results/datasets/{dset}/metadata.tsv",
         mlst="results/datasets/{dset}/mlst.tsv",
+        acc_map="results/datasets/{dset}/assembly_to_chrom.tsv",
     params:
         thr=lambda w: dsets[w.dset]["threshold"],
         st=lambda w: dsets[w.dset]["strain"],
@@ -239,7 +240,8 @@ rule create_dset:
             --threshold {params.thr} \
             --out_dir {output.seqs} \
             --out_mtd {output.mtd} \
-            --out_mlst {output.mlst}
+            --out_mlst {output.mlst} \
+            --out_acc_map {output.acc_map}
         """
 
 

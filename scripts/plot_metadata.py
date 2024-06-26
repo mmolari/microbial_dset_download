@@ -22,7 +22,6 @@ def load_metadata(fname):
     lab = "Assembly BioSample Geographic location "
     nlab = "Geographic Location"
     df[nlab] = df[lab].str.split(":").str[0].str.strip()
-    df[nlab] = df[nlab].astype("category")
 
     mp = {
         "unknown": None,
