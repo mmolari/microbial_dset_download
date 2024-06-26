@@ -1,3 +1,3 @@
-# S. aureus clade comparison
+# Dataset creation pipeline
 
-Comparative genomics for different *S. aureus* clades
+Pipeline to create a dataset of closely-related bacterial isolates.

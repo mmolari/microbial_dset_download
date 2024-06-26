@@ -2,3 +2,4 @@
 /data/
 /results/
 /.snakemake/
+__pycache__/

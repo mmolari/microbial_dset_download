@@ -1,2 +1,11 @@
-ref_acc:
-  ST5: "GCF_000009665.1"
+species:
+  saureus: "staphylococcus aureus"
+
+dsets:
+  saureus_ST5:
+    species: "saureus"
+    strain: "5"
+    ref_acc: "GCF_000009665.1"
+    threshold: 0.005
+    mlst_scheme: "saureus"
+  

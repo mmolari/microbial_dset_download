@@ -1,32 +1,30 @@
-import os
-
-
 configfile: "config.yml"
 
 
-ref_dict = config["ref_acc"]
+dsets = config["dsets"]
+species = config["species"]
 
 
 rule download_ref:
     output:
-        "data/ref/{r_acc}.fa",
+        "data/ref/record/{ref_acc}.fa",
     conda:
         "envs/ncbi.yml"
     shell:
         """
-        datasets download genome accession {wildcards.r_acc} \
-            --filename {wildcards.r_acc}.zip
-        unzip {wildcards.r_acc}.zip -d {wildcards.r_acc}
-        mv {wildcards.r_acc}/ncbi_dataset/data/*/*.fna {output}
-        rm -r {wildcards.r_acc} {wildcards.r_acc}.zip
+        datasets download genome accession {wildcards.ref_acc} \
+            --filename {wildcards.ref_acc}.zip
+        unzip {wildcards.ref_acc}.zip -d {wildcards.ref_acc}
+        mv {wildcards.ref_acc}/ncbi_dataset/data/*/*.fna {output}
+        rm -r {wildcards.ref_acc} {wildcards.ref_acc}.zip
         """
 
 
 rule ref_to_chromosome:
     input:
-        lambda w: expand(rules.download_ref.output, r_acc=ref_dict[w.ref]),
+        rules.download_ref.output,
     output:
-        "data/ref_chromosome/{ref}.fa",
+        "data/ref/chromosome/{ref_acc}.fa",
     conda:
         "envs/bioinfo.yml"
     shell:
@@ -53,12 +51,14 @@ rule ref_to_chromosome:
 
 rule download_dataset:
     output:
-        temp("data/dset.zip"),
+        "data/species/{species}/ncbi.zip",
+    params:
+        ncbi_sp=lambda w: species[w.species],
     conda:
         "envs/ncbi.yml"
     shell:
         """
-        datasets download genome taxon 'staphylococcus aureus' \
+        datasets download genome taxon '{params.ncbi_sp}' \
             --assembly-level complete \
             --assembly-source 'RefSeq' \
             --exclude-atypical \
@@ -71,20 +71,21 @@ rule expand_dataset:
     input:
         rules.download_dataset.output,
     output:
-        ds=temp(directory("data/dset")),
-        info=temp("data/dset_info.jsonl"),
+        ds=directory("data/species/{species}/ncbi"),
+        info=temp("data/species/{species}/info.jsonl"),
     conda:
         "envs/ncbi.yml"
     shell:
         """
-        unzip {input} -d tmp
+        TMP=$(mktemp -d)
+        unzip {input} -d $TMP
         mkdir -p {output.ds}
-        for f in tmp/ncbi_dataset/data/*/*.fna; do
+        for f in $TMP/ncbi_dataset/data/*/*.fna; do
             mv $f {output.ds}/$(basename $f)
         done
 
-        mv tmp/ncbi_dataset/data/*.jsonl {output.info}
-        rm -r tmp
+        mv $TMP/ncbi_dataset/data/*.jsonl {output.info}
+        rm -r $TMP
         """
 
 
@@ -92,7 +93,7 @@ rule info_to_tsv:
     input:
         rules.expand_dataset.output.info,
     output:
-        "data/dset_info.tsv",
+        "data/species/{species}/info.tsv",
     conda:
         "envs/ncbi.yml"
     shell:
@@ -105,7 +106,7 @@ rule chromosome_fa:
     input:
         rules.expand_dataset.output.ds,
     output:
-        directory("data/chromosomes"),
+        directory("data/species/{species}/chromosomes"),
     conda:
         "envs/bioinfo.yml"
     shell:
@@ -117,12 +118,25 @@ rule chromosome_fa:
         """
 
 
+rule assembly_to_chrom_acc:
+    input:
+        rules.expand_dataset.output.info,
+    output:
+        "data/species/{species}/assembly_to_chrom.tsv",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/assembly_to_chrom_acc.py --fas {input} --out {output}
+        """
+
+
 rule mash_dist:
     input:
         fas=rules.chromosome_fa.output,
         ref=rules.ref_to_chromosome.output,
     output:
-        "results/mash_dist/{ref}.tsv",
+        "data/species/{species}/mash_dist/{ref_acc}.tsv",
     conda:
         "envs/mash.yml"
     shell:
@@ -135,7 +149,7 @@ rule mlst:
     input:
         rules.chromosome_fa.output,
     output:
-        "results/mlst.tsv",
+        "data/species/{species}/mlst.tsv",
     conda:
         "envs/mlst.yml"
     shell:
@@ -144,10 +158,92 @@ rule mlst:
         """
 
 
+rule fig_mash_dist:
+    input:
+        mash=lambda w: expand(
+            rules.mash_dist.output,
+            species=dsets[w.dset]["species"],
+            ref_acc=dsets[w.dset]["ref_acc"],
+        ),
+        mlst=lambda w: expand(
+            rules.mlst.output,
+            species=dsets[w.dset]["species"],
+        ),
+    output:
+        "results/{dset}/figs/mash_dist.pdf",
+    params:
+        st_num=lambda w: dsets[w.dset]["strain"],
+        thr=lambda w: dsets[w.dset]["threshold"],
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_mash_dist.py \
+            --mash {input.mash} \
+            --mlst {input.mlst} \
+            --ST_num {params.st_num} \
+            --threshold {params.thr} \
+            --out_fig {output}
+        """
+
+
+rule fig_ST:
+    input:
+        lambda w: expand(rules.mlst.output, species=dsets[w.dset]["species"]),
+    output:
+        "results/{dset}/figs/ST_distribution.pdf",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_ST.py \
+            --mlst {input} \
+            --out_fig {output}
+        """
+
+
+rule create_dset:
+    input:
+        mlst=lambda w: expand(rules.mlst.output, species=dsets[w.dset]["species"]),
+        mash=lambda w: expand(
+            rules.mash_dist.output,
+            species=dsets[w.dset]["species"],
+            ref_acc=dsets[w.dset]["ref_acc"],
+        ),
+        mtd=lambda w: expand(rules.info_to_tsv.output, species=dsets[w.dset]["species"]),
+        acm=lambda w: expand(
+            rules.assembly_to_chrom_acc.output, species=dsets[w.dset]["species"]
+        ),
+        fas=lambda w: expand(
+            rules.chromosome_fa.output, species=dsets[w.dset]["species"]
+        ),
+    output:
+        seqs=directory("results/datasets/{dset}/fa"),
+        mtd="results/datasets/{dset}/metadata.tsv",
+        mlst="results/datasets/{dset}/mlst.tsv",
+    params:
+        thr=lambda w: dsets[w.dset]["threshold"],
+        st=lambda w: dsets[w.dset]["strain"],
+    conda:
+        "envs/ncbi.yml"
+    shell:
+        """
+        python3 scripts/create_dset.py \
+            --mlst {input.mlst} \
+            --mash {input.mash} \
+            --mtd {input.mtd} \
+            --acc_map {input.acm} \
+            --fas {input.fas} \
+            --ST {params.st} \
+            --threshold {params.thr} \
+            --out_dir {output.seqs} \
+            --out_mtd {output.mtd} \
+            --out_mlst {output.mlst}
+        """
+
+
 rule all:
     input:
-        # rules.download_summary.output,
-        rules.chromosome_fa.output,
-        rules.info_to_tsv.output,
-        rules.mlst.output,
-        expand(rules.mash_dist.output, ref=ref_dict.keys()),
+        expand(rules.fig_ST.output, dset=dsets.keys()),
+        expand(rules.fig_mash_dist.output, dset=dsets.keys()),
+        expand(rules.create_dset.output, dset=dsets.keys()),
