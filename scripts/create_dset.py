@@ -48,6 +48,7 @@ if __name__ == "__main__":
     # create metadata sub-index
     acc_df = pd.read_csv(args.acc_map, sep="\t")
     acc_df.set_index("chromosome_acc", inplace=True)
+    isolates = [i.removesuffix(".fa") for i in isolates]
     assembly_acc = acc_df.loc[isolates, "assembly_acc"].values
 
     # load and select metadata

@@ -171,7 +171,7 @@ rule fig_mash_dist:
             species=dsets[w.dset]["species"],
         ),
     output:
-        "results/{dset}/figs/mash_dist.pdf",
+        "results/datasets/{dset}/figs/mash_dist.pdf",
     params:
         st_num=lambda w: dsets[w.dset]["strain"],
         thr=lambda w: dsets[w.dset]["threshold"],
@@ -192,7 +192,7 @@ rule fig_ST:
     input:
         lambda w: expand(rules.mlst.output, species=dsets[w.dset]["species"]),
     output:
-        "results/{dset}/figs/ST_distribution.pdf",
+        "results/datasets/{dset}/figs/ST_distribution.pdf",
     conda:
         "envs/bioinfo.yml"
     shell:
@@ -243,11 +243,11 @@ rule create_dset:
         """
 
 
-rule fig_metdata:
+rule fig_metadata:
     input:
         rules.create_dset.output.mtd,
     output:
-        "results/{dset}/figs/metadata.pdf",
+        "results/datasets/{dset}/figs/metadata.pdf",
     conda:
         "envs/bioinfo.yml"
     shell:
@@ -261,4 +261,4 @@ rule all:
         expand(rules.fig_ST.output, dset=dsets.keys()),
         expand(rules.fig_mash_dist.output, dset=dsets.keys()),
         expand(rules.create_dset.output, dset=dsets.keys()),
-        expand(rules.fig_metdata.output, dset=dsets.keys()),
+        expand(rules.fig_metadata.output, dset=dsets.keys()),

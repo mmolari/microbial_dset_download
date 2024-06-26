@@ -46,20 +46,18 @@ if __name__ == "__main__":
 
     df = load_metadata(args.metadata)
 
-    fig, axs = plt.subplots(1, 2, figsize=(10, 8))
+    fig, axs = plt.subplots(1, 2, figsize=(8, 9))
 
     ax = axs[0]
     lab = "Assembly BioSample Collection date "
-    sns.histplot(data=df, x=lab, bins=30, ax=ax)
-    ax.set_title("collection date")
-    ax.set_xlabel("")
+    sns.histplot(data=df, y=lab, bins=30, ax=ax)
+    ax.set_ylabel("collection date")
 
     ax = axs[1]
     lab = "Geographic Location"
     cat_ord = df[lab].value_counts().sort_values(ascending=False).index
     sns.countplot(data=df, y=lab, ax=ax, order=cat_ord)
     ax.set_xscale("log")
-    ax.set_title("geographic location")
 
     sns.despine()
     plt.tight_layout()
