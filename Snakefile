@@ -72,7 +72,7 @@ rule expand_dataset:
         rules.download_dataset.output,
     output:
         ds=directory("data/species/{species}/ncbi"),
-        info=temp("data/species/{species}/info.jsonl"),
+        info="data/species/{species}/info.jsonl",
     conda:
         "envs/ncbi.yml"
     shell:
@@ -81,9 +81,8 @@ rule expand_dataset:
         unzip {input} -d $TMP
         mkdir -p {output.ds}
         for f in $TMP/ncbi_dataset/data/*/*.fna; do
-            mv $f {output.ds}/$(basename $f)
+            mv $f {output.ds}/$(basename $(dirname $f)).fa
         done
-
         mv $TMP/ncbi_dataset/data/*.jsonl {output.info}
         rm -r $TMP
         """
@@ -112,7 +111,7 @@ rule chromosome_fa:
     shell:
         """
         mkdir -p {output}
-        for f in {input}/*.fna; do
+        for f in {input}/*.fa; do
             python3 scripts/extract_chromosome.py --fa $f --out_dir {output}
         done
         """
@@ -120,7 +119,7 @@ rule chromosome_fa:
 
 rule assembly_to_chrom_acc:
     input:
-        rules.expand_dataset.output.info,
+        rules.expand_dataset.output.ds,
     output:
         "data/species/{species}/assembly_to_chrom.tsv",
     conda:
@@ -150,11 +149,13 @@ rule mlst:
         rules.chromosome_fa.output,
     output:
         "data/species/{species}/mlst.tsv",
+    params:
+        scheme=lambda w: config["mlst_scheme"][w.species],
     conda:
         "envs/mlst.yml"
     shell:
         """
-        mlst --scheme saureus {input}/*.fa > {output}
+        mlst --scheme {params.scheme} {input}/*.fa > {output}
         """
 
 
@@ -225,7 +226,7 @@ rule create_dset:
         thr=lambda w: dsets[w.dset]["threshold"],
         st=lambda w: dsets[w.dset]["strain"],
     conda:
-        "envs/ncbi.yml"
+        "envs/bioinfo.yml"
     shell:
         """
         python3 scripts/create_dset.py \
@@ -242,8 +243,22 @@ rule create_dset:
         """
 
 
+rule fig_metdata:
+    input:
+        rules.create_dset.output.mtd,
+    output:
+        "results/{dset}/figs/metadata.pdf",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_metadata.py --metadata {input} --out_fig {output}
+        """
+
+
 rule all:
     input:
         expand(rules.fig_ST.output, dset=dsets.keys()),
         expand(rules.fig_mash_dist.output, dset=dsets.keys()),
         expand(rules.create_dset.output, dset=dsets.keys()),
+        expand(rules.fig_metdata.output, dset=dsets.keys()),

@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     df = ut.load_mash_mlst_df(mlst_fname=args.mlst, mash_fname=args.mash)
 
-    mask = (df["ST"] == args.ST_num) & (df["dist"] < args.threshold)
+    mask = (df["ST"] == args.ST) & (df["dist"] < args.threshold)
     df = df[mask]
 
     # export df for selected isolates
@@ -41,11 +41,11 @@ if __name__ == "__main__":
     src_dir = pathlib.Path(args.fas)
 
     for isolate in isolates:
-        src = src_dir / f"{isolate}.fa"
-        dst = out_dir / f"{isolate}.fa"
+        src = src_dir / isolate
+        dst = out_dir / isolate
         shutil.copy(src, dst)
 
-    # create metadata sub-dataset
+    # create metadata sub-index
     acc_df = pd.read_csv(args.acc_map, sep="\t")
     acc_df.set_index("chromosome_acc", inplace=True)
     assembly_acc = acc_df.loc[isolates, "assembly_acc"].values

@@ -18,9 +18,11 @@ def parse_args():
 
 def mash_dist_plot(df, threshold, st, out_fig):
 
+    # convert ST to string
+    df["ST"] = df["ST"].astype(str)
     mc_ST = df["ST"].value_counts().index[:5]
-    mc_ST = set(mc_ST) - {"-"}
-    df["main ST"] = df["ST"].map(lambda x: str(x) if x in mc_ST else "other")
+    mc_ST = (set(mc_ST) - {"-"}) | {str(st)}
+    df["main ST"] = df["ST"].map(lambda x: x if x in mc_ST else "other")
 
     mask_thr = df["dist"] <= threshold
     mask_st = df["ST"] == st
@@ -37,13 +39,11 @@ def mash_dist_plot(df, threshold, st, out_fig):
     )
 
     ax.axvline(threshold, color="red", linestyle="--")
-    ax.text(0.05, 0.9, f"N dist = {mask_thr.sum()} / {len(df)}", transform=ax.transAxes)
-    ax.text(0.05, 0.8, f"N ST = {mask_st.sum()} / {len(df)}", transform=ax.transAxes)
+    ax.text(0.04, 0.9, f"N tot = {len(df)}", transform=ax.transAxes)
+    ax.text(0.04, 0.85, f"N d = {mask_thr.sum()}", transform=ax.transAxes)
+    ax.text(0.04, 0.8, f"N ST = {mask_st.sum()}", transform=ax.transAxes)
     ax.text(
-        0.05,
-        0.7,
-        f"N ST & dist = {(mask_thr & mask_st).sum()} / {len(df)}",
-        transform=ax.transAxes,
+        0.04, 0.75, f"N ST&d = {(mask_thr & mask_st).sum()}", transform=ax.transAxes
     )
 
     plt.xlabel("mash distance")

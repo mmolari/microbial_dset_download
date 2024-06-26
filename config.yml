@@ -1,11 +1,17 @@
 species:
   saureus: "staphylococcus aureus"
 
+mlst_scheme:
+  saureus: "saureus"
+
 dsets:
   saureus_ST5:
     species: "saureus"
     strain: "5"
     ref_acc: "GCF_000009665.1"
     threshold: 0.005
-    mlst_scheme: "saureus"
-  
+  saureus_ST1:
+    species: "saureus"
+    strain: "1"
+    ref_acc: "GCF_002795285.1"
+    threshold: 0.005

@@ -13,14 +13,15 @@ def parse_args():
 
 def get_fa_acc(fa_fname):
     acc = pathlib.Path(fa_fname).stem
-    acc = "_".join(acc.split("_")[:-2])
     return acc
 
 
 def fa_first_entry_acc(fa_fname):
-    with open(fa_fname) as f:
-        entry = SeqIO.read(f, "fasta")
-        acc = entry.id
+    with open(fa_fname, "r") as f:
+        # read the first of many records
+        for record in SeqIO.parse(f, "fasta"):
+            acc = record.id
+            break
     return acc
 
 
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     fa_fld = pathlib.Path(args.fas)
 
     df = []
-    for fa_fname in fa_fld.glob("*.fna"):
+    for fa_fname in fa_fld.glob("*.fa"):
         acc = get_fa_acc(fa_fname)
         first_acc = fa_first_entry_acc(fa_fname)
         df.append([acc, first_acc])
