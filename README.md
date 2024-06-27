@@ -1,6 +1,13 @@
 # Dataset creation pipeline
 
-Pipeline to create a dataset of closely-related bacterial isolates.
+Pipeline to create a dataset of closely-related bacterial isolates. The pipeline:
+
+- downloads all RefSeq sequences from a given species.
+- performs MLST with [tseemann/mlst](https://github.com/tseemann/mlst)
+- and for a given desired sequence type and reference assembly:
+  - evaluates mash distance of the chromosome to the reference assembly chromosome
+  - selects all isolates with the specified sequence type, and at a mash distance smaller than a given threshold to the reference
+  - exports all chromosomes from the dataset, along with metadata
 
 ## setup
 
