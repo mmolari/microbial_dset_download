@@ -3,6 +3,7 @@ species:
   ecoli: "escherichia coli"
   kpneumoniae: "klebsiella pneumoniae"
   bpertussis: "bordetella pertussis"
+  mtuberculosis: "mycobacterium tuberculosis"
 
 
 mlst_scheme:
@@ -10,6 +11,7 @@ mlst_scheme:
   ecoli: "ecoli_achtman_4"
   kpneumoniae: "klebsiella"
   bpertussis: "bordetella_3"
+  mtuberculosis: "mycobacteria_2"
 
 dsets:
   saureus_ST5:
@@ -67,8 +69,13 @@ dsets:
     strain: "17"
     ref_acc: "GCF_037477805.1"
     threshold: 0.005
-  bpertussis_ST8:
+  bpertussis_ST83:
     species: "bpertussis"
-    strain: "8"
-    ref_acc: "GCA_004008975.1"
+    strain: "83"
+    ref_acc: "GCF_004635405.1"
+    threshold: 0.001
+  mtuberculosis_ST1:
+    species: "mtuberculosis"
+    strain: "1"
+    ref_acc: "GCA_000195955.2"
     threshold: 0.005
