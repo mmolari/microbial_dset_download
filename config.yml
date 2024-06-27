@@ -73,7 +73,7 @@ dsets:
     species: "bpertussis"
     strain: "83"
     ref_acc: "GCF_004635405.1"
-    threshold: 0.001
+    threshold: 0.0005
   mtuberculosis_ST1:
     species: "mtuberculosis"
     strain: "1"

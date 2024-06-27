@@ -11,7 +11,8 @@ def load_mash(df_fname):
 
 def load_mlst(df_fname):
     df = pd.read_csv(df_fname, sep="\t", header=None)
-    df.columns = ["qry", "mlst", "ST"] + [f"g{i+1}" for i in range(7)]
+    C = len(df.columns)
+    df.columns = ["qry", "mlst", "ST"] + [f"g{i+1}" for i in range(C - 3)]
     df["qry"] = df["qry"].str.split("/").str[-1]
     return df
 
