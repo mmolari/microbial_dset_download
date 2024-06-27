@@ -15,6 +15,8 @@ The pipeline requires a working installation of conda/mamba and snakemake (the p
 For cluster execution, also the `snakemake-executor-plugin-slurm` needs to be installed.
 For convenience we provide the `snakemake_env.yml` from which the environment can be initialized.
 
+Optionally you can add your ncbi api key in a file named `ncbi_api_key.txt`.
+
 ## picking the dataset
 
 The config file `config.yml` contains a list of the datasets to download:
