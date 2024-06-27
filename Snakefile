@@ -176,7 +176,9 @@ rule mlst:
         "envs/mlst.yml"
     shell:
         """
-        mlst --scheme {params.scheme} {input}/*.fa > {output}
+        mlst \
+            --scheme {params.scheme} \
+            {input}/*.fa > {output}
         """
 
 

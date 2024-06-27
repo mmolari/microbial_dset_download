@@ -7,9 +7,9 @@ species:
 
 mlst_scheme:
   saureus: "saureus"
-  ecoli: "ecoli"
-  kpneumoniae: "kpneumoniae"
-  bpertussis: "bordetella"
+  ecoli: "ecoli_achtman_4"
+  kpneumoniae: "klebsiella"
+  bpertussis: "bordetella_3"
 
 dsets:
   saureus_ST5:
@@ -26,4 +26,49 @@ dsets:
     species: "ecoli"
     strain: "73"
     ref_acc: "GCF_014262945.1"
+    threshold: 0.005
+  ecoli_ST69:
+    species: "ecoli"
+    strain: "69"
+    ref_acc: "GCA_024662075.1"
+    threshold: 0.005
+  ecoli_ST95:
+    species: "ecoli"
+    strain: "95"
+    ref_acc: "GCF_008632595.1"
+    threshold: 0.005
+  kpneumoniae_ST11:
+    species: "kpneumoniae"
+    strain: "11"
+    ref_acc: "GCA_003203435.1"
+    threshold: 0.005
+  kpneumoniae_ST258:
+    species: "kpneumoniae"
+    strain: "258"
+    ref_acc: "GCA_008121515.1"
+    threshold: 0.005
+  kpneumoniae_ST15:
+    species: "kpneumoniae"
+    strain: "15"
+    ref_acc: "GCF_025884175.1"
+    threshold: 0.005
+  kpneumoniae_ST14:
+    species: "kpneumoniae"
+    strain: "14"
+    ref_acc: "GCF_028583665.1"
+    threshold: 0.005
+  kpneumoniae_ST512:
+    species: "kpneumoniae"
+    strain: "512"
+    ref_acc: "GCF_021485005.1"
+    threshold: 0.005
+  kpneumoniae_ST17:
+    species: "kpneumoniae"
+    strain: "17"
+    ref_acc: "GCF_037477805.1"
+    threshold: 0.005
+  bpertussis_ST8:
+    species: "bpertussis"
+    strain: "8"
+    ref_acc: "GCA_004008975.1"
     threshold: 0.005
