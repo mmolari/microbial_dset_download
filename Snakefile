@@ -6,6 +6,14 @@ localrules:
     download_dataset,
 
 
+ncbi_api_key = ""
+try:
+    with open("config/ncbi_api_key.txt", "r") as f:
+        ncbi_api_key = f.read().strip()
+except:
+    print("No NCBI API key found. Optionally add your key in ncbi_api_key.txt")
+
+
 dsets = config["dsets"]
 species = config["species"]
 
@@ -15,9 +23,12 @@ rule download_ref:
         "data/ref/record/{ref_acc}.fa",
     conda:
         "envs/ncbi.yml"
+    params:
+        api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
     shell:
         """
         datasets download genome accession {wildcards.ref_acc} \
+            {params.api} \
             --filename {wildcards.ref_acc}.zip
         unzip {wildcards.ref_acc}.zip -d {wildcards.ref_acc}
         mv {wildcards.ref_acc}/ncbi_dataset/data/*/*.fna {output}
@@ -43,9 +54,12 @@ rule ref_to_chromosome:
 #         "data/summary_info.json"
 #     conda:
 #         "envs/ncbi.yml"
+#     params:
+#         api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
 #     shell:
 #         """
 #         datasets summary genome taxon 'staphylococcus aureus' \
+#             {params.api} \
 #             --assembly-level complete \
 #             --assembly-source 'RefSeq' \
 #             --exclude-atypical \
@@ -61,9 +75,12 @@ rule download_dataset:
         ncbi_sp=lambda w: species[w.species],
     conda:
         "envs/ncbi.yml"
+    params:
+        api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
     shell:
         """
         datasets download genome taxon '{params.ncbi_sp}' \
+            {params.api} \
             --assembly-level complete \
             --assembly-source 'RefSeq' \
             --exclude-atypical \
