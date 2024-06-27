@@ -114,11 +114,15 @@ rule info_to_tsv:
         rules.expand_dataset.output.info,
     output:
         "data/species/{species}/info.tsv",
+    params:
+        fields=",".join(config["metadata"]),
     conda:
         "envs/ncbi.yml"
     shell:
         """
-        dataformat tsv genome --inputfile {input} > {output}
+        dataformat tsv genome \
+            --fields {params.fields} \
+            --inputfile {input} > {output}
         """
 
 

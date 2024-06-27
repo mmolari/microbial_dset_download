@@ -79,3 +79,31 @@ dsets:
     strain: "1"
     ref_acc: "GCA_000195955.2"
     threshold: 0.005
+
+
+metadata:
+  - accession
+  - assminfo-biosample-accession
+  - assminfo-biosample-collection-date
+  - assminfo-biosample-geo-loc-name
+  - assminfo-biosample-host
+  - assminfo-biosample-isolate
+  - assminfo-biosample-strain
+  - assminfo-biosample-description-comment
+  - assminfo-bioproject
+  - assminfo-name
+  - assminfo-assembly-method
+  - assminfo-sequencing-tech
+  - assminfo-submitter
+  - assmstats-total-number-of-chromosomes
+  - assmstats-total-number-of-chromosomes
+  - assmstats-total-sequence-len
+  - assmstats-contig-l50
+  - assmstats-contig-l50
+  - assmstats-gc-percent
+  - assmstats-genome-coverage
+  - annotinfo-featcount-gene-total
+  - annotinfo-pipeline
+  - annotinfo-provider
+  - annotinfo-release-date
+  - checkm-completeness
