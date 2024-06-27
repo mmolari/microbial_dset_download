@@ -8,7 +8,7 @@ localrules:
 
 ncbi_api_key = ""
 try:
-    with open("config/ncbi_api_key.txt", "r") as f:
+    with open("ncbi_api_key.txt", "r") as f:
         ncbi_api_key = f.read().strip()
 except:
     print("No NCBI API key found. Optionally add your key in ncbi_api_key.txt")
@@ -73,10 +73,9 @@ rule download_dataset:
         "data/species/{species}/ncbi.zip",
     params:
         ncbi_sp=lambda w: species[w.species],
+        api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
     conda:
         "envs/ncbi.yml"
-    params:
-        api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
     shell:
         """
         datasets download genome taxon '{params.ncbi_sp}' \
