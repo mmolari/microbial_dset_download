@@ -1,8 +1,15 @@
 species:
   saureus: "staphylococcus aureus"
+  ecoli: "escherichia coli"
+  kpneumoniae: "klebsiella pneumoniae"
+  bpertussis: "bordetella pertussis"
+
 
 mlst_scheme:
   saureus: "saureus"
+  ecoli: "ecoli"
+  kpneumoniae: "kpneumoniae"
+  bpertussis: "bordetella"
 
 dsets:
   saureus_ST5:
@@ -14,4 +21,9 @@ dsets:
     species: "saureus"
     strain: "1"
     ref_acc: "GCF_002795285.1"
+    threshold: 0.005
+  ecoli_ST73:
+    species: "ecoli"
+    strain: "73"
+    ref_acc: "GCF_014262945.1"
     threshold: 0.005

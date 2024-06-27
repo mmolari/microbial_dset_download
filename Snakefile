@@ -1,6 +1,11 @@
 configfile: "config.yml"
 
 
+localrules:
+    download_ref,
+    download_dataset,
+
+
 dsets = config["dsets"]
 species = config["species"]
 
