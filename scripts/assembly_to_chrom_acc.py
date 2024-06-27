@@ -19,9 +19,9 @@ def get_fa_acc(fa_fname):
 def fa_first_entry_acc(fa_fname):
     with open(fa_fname, "r") as f:
         # read the first of many records
-        for record in SeqIO.parse(f, "fasta"):
-            acc = record.id
-            break
+        records = list(SeqIO.parse(f, "fasta"))
+    r = max(records, key=lambda x: len(x.seq))
+    acc = r.id.split()[0]
     return acc
 
 

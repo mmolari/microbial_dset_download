@@ -26,17 +26,17 @@ dsets:
     species: "ecoli"
     strain: "73"
     ref_acc: "GCF_014262945.1"
-    threshold: 0.005
+    threshold: 0.008
   ecoli_ST69:
     species: "ecoli"
     strain: "69"
     ref_acc: "GCA_024662075.1"
-    threshold: 0.005
+    threshold: 0.008
   ecoli_ST95:
     species: "ecoli"
     strain: "95"
     ref_acc: "GCF_008632595.1"
-    threshold: 0.005
+    threshold: 0.008
   kpneumoniae_ST11:
     species: "kpneumoniae"
     strain: "11"
