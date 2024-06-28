@@ -74,11 +74,11 @@ dsets:
     strain: "83"
     ref_acc: "GCF_004635405.1"
     threshold: 0.0005
-  mtuberculosis_ST1:
+  mtuberculosis_ST276:
     species: "mtuberculosis"
-    strain: "1"
-    ref_acc: "GCA_000195955.2"
-    threshold: 0.005
+    strain: "276"
+    ref_acc: "GCF_000572175.1"
+    threshold: 0.001
 
 
 metadata:
