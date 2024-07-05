@@ -4,6 +4,7 @@ species:
   kpneumoniae: "klebsiella pneumoniae"
   bpertussis: "bordetella pertussis"
   mtuberculosis: "mycobacterium tuberculosis"
+  paeruginosa: "pseudomonas aeruginosa" 
 
 
 mlst_scheme:
@@ -12,6 +13,7 @@ mlst_scheme:
   kpneumoniae: "klebsiella"
   bpertussis: "bordetella_3"
   mtuberculosis: "mycobacteria_2"
+  paeruginosa: "paeruginosa"
 
 dsets:
   saureus_ST5:
@@ -74,6 +76,21 @@ dsets:
     strain: "276"
     ref_acc: "GCF_000572175.1"
     threshold: 0.001
+  paeruginosa_ST235:
+    species: "paeruginosa"
+    strain: "235"
+    ref_acc: "GCF_000284555.1"
+    threshold: 0.005
+  paeruginosa_ST111:
+    species: "paeruginosa"
+    strain: "111"
+    ref_acc: "GCF_025723085.1"
+    threshold: 0.004
+  paeruginosa_ST463:
+    species: "paeruginosa"
+    strain: "463"
+    ref_acc: "GCF_019857265.1"
+    threshold: 0.0025
 
 
 metadata:
