@@ -74,6 +74,7 @@ rule download_dataset:
     params:
         ncbi_sp=lambda w: species[w.species],
         api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
+        emi=lambda w: "" if (w.species in config["keep_multi_isolate"]) else "--exclude-multi-isolate"
     conda:
         "envs/ncbi.yml"
     shell:
@@ -83,7 +84,8 @@ rule download_dataset:
             --assembly-level complete \
             --assembly-source 'RefSeq' \
             --exclude-atypical \
-            --exclude-multi-isolate \
+            {params.emi} \
+            --mag exclude \
             --filename {output}
         """
 

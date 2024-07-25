@@ -4,7 +4,10 @@ species:
   kpneumoniae: "klebsiella pneumoniae"
   bpertussis: "bordetella pertussis"
   mtuberculosis: "mycobacterium tuberculosis"
-  paeruginosa: "pseudomonas aeruginosa" 
+  paeruginosa: "pseudomonas aeruginosa"
+  hpylori: "helicobacter pylori"
+  spneumoniae: "streptococcus pneumoniae"
+  spyogenes: "streptococcus pyogenes"
 
 
 mlst_scheme:
@@ -14,88 +17,119 @@ mlst_scheme:
   bpertussis: "bordetella_3"
   mtuberculosis: "mycobacteria_2"
   paeruginosa: "paeruginosa"
+  hpylori: "helicobacter"
+  spneumoniae: "spneumoniae"
+  spyogenes: spyogenes
+
+keep_multi_isolate:
+  - "hpylori"
 
 dsets:
-  saureus_ST5:
-    species: "saureus"
-    strain: "5"
-    ref_acc: "GCF_000009665.1"
+  hpylori_ST3020:
+    species: "hpylori"
+    strain: "3020"
+    ref_acc: "GCF_002952575.1"
     threshold: 0.005
-  saureus_ST1:
-    species: "saureus"
-    strain: "1"
-    ref_acc: "GCF_002795285.1"
+  hpylori_none:
+    species: "hpylori"
+    strain: "-"
+    ref_acc: "GCF_011457615.1"
     threshold: 0.005
-  ecoli_ST73:
-    species: "ecoli"
-    strain: "73"
-    ref_acc: "GCF_014262945.1"
-    threshold: 0.008
-  ecoli_ST69:
-    species: "ecoli"
-    strain: "69"
-    ref_acc: "GCA_024662075.1"
-    threshold: 0.008
-  ecoli_ST95:
-    species: "ecoli"
-    strain: "95"
-    ref_acc: "GCF_008632595.1"
-    threshold: 0.008
-  ecoli_ST131:
-    species: "ecoli"
-    strain: "131"
-    ref_acc: "GCF_030708235.1"
-    threshold: 0.008
-  kpneumoniae_ST258:
-    species: "kpneumoniae"
-    strain: "258"
-    ref_acc: "GCA_008121515.1"
+  spneumoniae_180:
+    species: "spneumoniae"
+    strain: "180"
+    ref_acc: "GCF_000210995.1"
     threshold: 0.005
-  kpneumoniae_ST15:
-    species: "kpneumoniae"
-    strain: "15"
-    ref_acc: "GCF_025884175.1"
+  spyogenes_28:
+    species: "spyogenes"
+    strain: "28"
+    ref_acc: "GCF_028370235.1"
     threshold: 0.005
-  kpneumoniae_ST14:
-    species: "kpneumoniae"
-    strain: "14"
-    ref_acc: "GCF_028583665.1"
+  spyogenes_52:
+    species: "spyogenes"
+    strain: "52"
+    ref_acc: "GCF_004154185.1"
     threshold: 0.005
-  kpneumoniae_ST512:
-    species: "kpneumoniae"
-    strain: "512"
-    ref_acc: "GCF_021485005.1"
-    threshold: 0.005
-  kpneumoniae_ST17:
-    species: "kpneumoniae"
-    strain: "17"
-    ref_acc: "GCF_037477805.1"
-    threshold: 0.005
-  bpertussis_ST83:
-    species: "bpertussis"
-    strain: "83"
-    ref_acc: "GCF_004635405.1"
-    threshold: 0.0005
-  mtuberculosis_ST276:
-    species: "mtuberculosis"
-    strain: "276"
-    ref_acc: "GCF_000572175.1"
-    threshold: 0.001
-  paeruginosa_ST235:
-    species: "paeruginosa"
-    strain: "235"
-    ref_acc: "GCF_000284555.1"
-    threshold: 0.005
-  paeruginosa_ST111:
-    species: "paeruginosa"
-    strain: "111"
-    ref_acc: "GCF_025723085.1"
-    threshold: 0.004
-  paeruginosa_ST463:
-    species: "paeruginosa"
-    strain: "463"
-    ref_acc: "GCF_019857265.1"
-    threshold: 0.0025
+  # saureus_ST5:
+  #   species: "saureus"
+  #   strain: "5"
+  #   ref_acc: "GCF_000009665.1"
+  #   threshold: 0.005
+  # saureus_ST1:
+  #   species: "saureus"
+  #   strain: "1"
+  #   ref_acc: "GCF_002795285.1"
+  #   threshold: 0.005
+  # ecoli_ST73:
+  #   species: "ecoli"
+  #   strain: "73"
+  #   ref_acc: "GCF_014262945.1"
+  #   threshold: 0.008
+  # ecoli_ST69:
+  #   species: "ecoli"
+  #   strain: "69"
+  #   ref_acc: "GCA_024662075.1"
+  #   threshold: 0.008
+  # ecoli_ST95:
+  #   species: "ecoli"
+  #   strain: "95"
+  #   ref_acc: "GCF_008632595.1"
+  #   threshold: 0.008
+  # ecoli_ST131:
+  #   species: "ecoli"
+  #   strain: "131"
+  #   ref_acc: "GCF_030708235.1"
+  #   threshold: 0.008
+  # kpneumoniae_ST258:
+  #   species: "kpneumoniae"
+  #   strain: "258"
+  #   ref_acc: "GCA_008121515.1"
+  #   threshold: 0.005
+  # kpneumoniae_ST15:
+  #   species: "kpneumoniae"
+  #   strain: "15"
+  #   ref_acc: "GCF_025884175.1"
+  #   threshold: 0.005
+  # kpneumoniae_ST14:
+  #   species: "kpneumoniae"
+  #   strain: "14"
+  #   ref_acc: "GCF_028583665.1"
+  #   threshold: 0.005
+  # kpneumoniae_ST512:
+  #   species: "kpneumoniae"
+  #   strain: "512"
+  #   ref_acc: "GCF_021485005.1"
+  #   threshold: 0.005
+  # kpneumoniae_ST17:
+  #   species: "kpneumoniae"
+  #   strain: "17"
+  #   ref_acc: "GCF_037477805.1"
+  #   threshold: 0.005
+  # bpertussis_ST83:
+  #   species: "bpertussis"
+  #   strain: "83"
+  #   ref_acc: "GCF_004635405.1"
+  #   threshold: 0.0005
+  # mtuberculosis_ST276:
+  #   species: "mtuberculosis"
+  #   strain: "276"
+  #   ref_acc: "GCF_000572175.1"
+  #   threshold: 0.001
+  # paeruginosa_ST235:
+  #   species: "paeruginosa"
+  #   strain: "235"
+  #   ref_acc: "GCF_000284555.1"
+  #   threshold: 0.005
+  # paeruginosa_ST111:
+  #   species: "paeruginosa"
+  #   strain: "111"
+  #   ref_acc: "GCF_025723085.1"
+  #   threshold: 0.004
+  # paeruginosa_ST463:
+  #   species: "paeruginosa"
+  #   strain: "463"
+  #   ref_acc: "GCF_019857265.1"
+  #   threshold: 0.0025
 
 
 metadata:
