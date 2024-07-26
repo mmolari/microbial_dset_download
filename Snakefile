@@ -74,7 +74,16 @@ rule download_dataset:
     params:
         ncbi_sp=lambda w: species[w.species],
         api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
-        emi=lambda w: "" if (w.species in config["keep_multi_isolate"]) else "--exclude-multi-isolate"
+        emi=lambda w: (
+            ""
+            if (w.species in config["keep_multi_isolate"])
+            else "--exclude-multi-isolate"
+        ),
+        refsq=lambda w: (
+            "--annotated"
+            if (w.species in config["not_only_refseq"])
+            else "--assembly-source 'RefSeq'"
+        ),
     conda:
         "envs/ncbi.yml"
     shell:
@@ -82,7 +91,7 @@ rule download_dataset:
         datasets download genome taxon '{params.ncbi_sp}' \
             {params.api} \
             --assembly-level complete \
-            --assembly-source 'RefSeq' \
+            {params.refsq} \
             --exclude-atypical \
             {params.emi} \
             --mag exclude \

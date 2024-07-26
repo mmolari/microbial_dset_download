@@ -21,6 +21,9 @@ mlst_scheme:
   spneumoniae: "spneumoniae"
   spyogenes: spyogenes
 
+not_only_refseq:
+  - "hpylori"
+
 keep_multi_isolate:
   - "hpylori"
 
