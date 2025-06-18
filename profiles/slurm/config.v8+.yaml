@@ -5,7 +5,6 @@ executor: "slurm"
 latency-wait: 60
 jobs: 20
 default-resources:
-  mem_mb: 3000
-  threads: 1
+  mem_mb: 5000
   slurm_extra: "'--qos=6hours'"
   runtime: 350m

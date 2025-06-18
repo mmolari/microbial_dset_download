@@ -146,13 +146,21 @@ rule attotree:
     params:
         k=21,
         s=50000,
+        fof="data/species/{species}/attotree.fof",  # temporary file of filenames
     shell:
         """
-        attotree {input.fas}/*.fa \
-            -o {output.tree} \
-            -t {threads} \
-            -k {params.k} \
-            -s {params.s}
+        # 1. Build the file-of-filenames once.
+        find {input.fas} -maxdepth 1 -name '*.fa' -print > {params.fof}
+
+        # 2. Run attotree in list-input mode.
+        attotree -L {params.fof} \
+                 -o {output.tree} \
+                 -t {threads} \
+                 -k {params.k} \
+                 -s {params.s}
+
+        # 3. Clean up the list file.
+        rm -f {params.fof}
         """
 
 
