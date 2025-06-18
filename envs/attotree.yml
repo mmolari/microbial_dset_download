@@ -1,6 +1,7 @@
-name: ncbi
+name: attotree
 channels:
   - conda-forge
   - defaults
+  - bioconda
 dependencies:
-  - ncbi-datasets-cli=18.3.1
+  - attotree
