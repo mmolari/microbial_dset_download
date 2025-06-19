@@ -1,9 +1,9 @@
 species:
   ecoli: "escherichia coli"
-  # saureus: "staphylococcus aureus"
-  # hpylori: "helicobacter pylori"
-  # spneumoniae: "streptococcus pneumoniae"
-  # kpneumoniae: "klebsiella pneumoniae"
+  saureus: "staphylococcus aureus"
+  hpylori: "helicobacter pylori"
+  spneumoniae: "streptococcus pneumoniae"
+  kpneumoniae: "klebsiella pneumoniae"
   # mtuberculosis: "mycobacterium tuberculosis"
   # bpertussis: "bordetella pertussis"
   # paeruginosa: "pseudomonas aeruginosa"
