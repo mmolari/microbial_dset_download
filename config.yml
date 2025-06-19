@@ -4,11 +4,11 @@ species:
   hpylori: "helicobacter pylori"
   spneumoniae: "streptococcus pneumoniae"
   kpneumoniae: "klebsiella pneumoniae"
-  # mtuberculosis: "mycobacterium tuberculosis"
-  # bpertussis: "bordetella pertussis"
-  # paeruginosa: "pseudomonas aeruginosa"
-  # spyogenes: "streptococcus pyogenes"
-  # sflexneri: "shigella flexneri"
+  mtuberculosis: "mycobacterium tuberculosis"
+  bpertussis: "bordetella pertussis"
+  paeruginosa: "pseudomonas aeruginosa"
+  spyogenes: "streptococcus pyogenes"
+  sflexneri: "shigella flexneri"
 
 
 mlst_scheme:
