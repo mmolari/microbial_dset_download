@@ -164,6 +164,21 @@ rule attotree:
         """
 
 
+rule refine_tree:
+    input:
+        tree="data/species/{species}/attotree.nwk",
+    output:
+        "results/{species}/attotree.nwk",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/refine_tree.py \
+            --tree {input.tree} \
+            --out_tree {output}
+        """
+
+
 rule mlst:
     input:
         rules.chromosome_fa.output,
@@ -187,7 +202,7 @@ rule combine_metadata:
         chrom="data/species/{species}/assembly_to_chrom.tsv",
         mlst="data/species/{species}/mlst.tsv",
     output:
-        "results/{species}/combined_metadata.tsv",
+        "results/{species}/combined_metadata.csv",
     conda:
         "envs/bioinfo.yml"
     shell:
@@ -202,7 +217,7 @@ rule combine_metadata:
 
 rule plot_metadata_overview:
     input:
-        "results/{species}/combined_metadata.tsv",
+        rules.combine_metadata.output,
     output:
         "results/{species}/metadata_overview.png",
     params:
@@ -227,6 +242,6 @@ rule clean:
 
 rule all:
     input:
-        expand(rules.attotree.output.tree, species=species),
+        expand(rules.refine_tree.output, species=species),
         expand(rules.combine_metadata.output, species=species),
         expand(rules.plot_metadata_overview.output, species=species),
