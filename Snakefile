@@ -181,66 +181,26 @@ rule mlst:
         """
 
 
-# rule fig_mash_dist:
-#     input:
-#         mash=lambda w: expand(
-#             rules.mash_dist.output,
-#             species=dsets[w.dset]["species"],
-#             ref_acc=dsets[w.dset]["ref_acc"],
-#         ),
-#         mlst=lambda w: expand(
-#             rules.mlst.output,
-#             species=dsets[w.dset]["species"],
-#         ),
-#     output:
-#         "results/datasets/{dset}/figs/mash_dist.pdf",
-#     params:
-#         st_num=lambda w: dsets[w.dset]["strain"],
-#         thr=lambda w: dsets[w.dset]["threshold"],
-#     conda:
-#         "envs/bioinfo.yml"
-#     shell:
-#         """
-#         python3 scripts/plot_mash_dist.py \
-#             --mash {input.mash} \
-#             --mlst {input.mlst} \
-#             --ST_num {params.st_num} \
-#             --threshold {params.thr} \
-#             --out_fig {output}
-#         """
-
-
-# rule fig_ST:
-#     input:
-#         lambda w: expand(rules.mlst.output, species=dsets[w.dset]["species"]),
-#     output:
-#         "results/datasets/{dset}/figs/ST_distribution.pdf",
-#     conda:
-#         "envs/bioinfo.yml"
-#     shell:
-#         """
-#         python3 scripts/plot_ST.py \
-#             --mlst {input} \
-#             --out_fig {output}
-#         """
-
-
-# rule fig_metadata:
-#     input:
-#         rules.create_dset.output.mtd,
-#     output:
-#         "results/datasets/{dset}/figs/metadata.pdf",
-#     conda:
-#         "envs/bioinfo.yml"
-#     shell:
-#         """
-#         python3 scripts/plot_metadata.py --metadata {input} --out_fig {output}
-#         """
+rule combine_metadata:
+    input:
+        metadata="data/species/{species}/info.tsv",
+        chrom="data/species/{species}/assembly_to_chrom.tsv",
+        mlst="data/species/{species}/mlst.tsv",
+    output:
+        "results/{species}/combined_metadata.tsv",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/combine_metadata.py \
+            --metadata_file {input.metadata} \
+            --chromosome_mapping_file {input.chrom} \
+            --mlst_file {input.mlst} \
+            --output {output}
+        """
 
 
 rule all:
     input:
-        expand(rules.info_to_tsv.output, species=species),
-        expand(rules.mlst.output, species=species),
         expand(rules.attotree.output.tree, species=species),
-        expand(rules.assembly_to_chrom_acc.output, species=species),
+        expand(rules.combine_metadata.output, species=species),
