@@ -200,7 +200,33 @@ rule combine_metadata:
         """
 
 
+rule plot_metadata_overview:
+    input:
+        "results/{species}/combined_metadata.tsv",
+    output:
+        "results/{species}/metadata_overview.png",
+    params:
+        species_name=lambda w: species[w.species],
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_metadata_overview.py \
+            --df {input} \
+            --species '{params.species_name}' \
+            --fig {output}
+        """
+
+
+rule clean:
+    shell:
+        """
+        rm -f results/*/metadata_overview.png
+        """
+
+
 rule all:
     input:
         expand(rules.attotree.output.tree, species=species),
         expand(rules.combine_metadata.output, species=species),
+        expand(rules.plot_metadata_overview.output, species=species),
