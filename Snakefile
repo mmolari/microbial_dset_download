@@ -233,6 +233,24 @@ rule plot_metadata_overview:
         """
 
 
+# Plot tree with metadata using plot_tree.py
+rule plot_tree:
+    input:
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        "results/{species}/tree_metadata.png",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_tree.py \
+            --tree {input.tree} \
+            --metadata {input.metadata} \
+            --fig {output}
+        """
+
+
 rule clean:
     shell:
         """
@@ -245,3 +263,4 @@ rule all:
         expand(rules.refine_tree.output, species=species),
         expand(rules.combine_metadata.output, species=species),
         expand(rules.plot_metadata_overview.output, species=species),
+        expand(rules.plot_tree.output, species=species),
