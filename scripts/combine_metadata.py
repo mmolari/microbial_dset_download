@@ -1,11 +1,8 @@
-# %%
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import argparse
 
 
-# %%
 def load_metadata(fname):
     """Load metadata dataframe from TSV file."""
     df_meta = pd.read_csv(
@@ -81,74 +78,41 @@ def decorate_metadata(df_meta, df_chrom, df_mlst=None):
     return df_meta
 
 
-species = "saureus"
+def parse_arguments():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Combine metadata with MLST and chromosome mapping data"
+    )
+    parser.add_argument(
+        "--metadata_file", required=True, help="Path to metadata TSV file"
+    )
+    parser.add_argument(
+        "--chromosome_mapping_file",
+        required=True,
+        help="Path to chromosome mapping TSV file",
+    )
+    parser.add_argument("--mlst_file", help="Path to MLST TSV file (optional)")
+    parser.add_argument(
+        "--output", required=True, help="Output filename for combined metadata"
+    )
 
-# Load data
-df_meta = load_metadata(f"../data/species/{species}/info.tsv")
-df_mlst = load_mlst(f"../data/species/{species}/mlst.tsv")
-df_chrom = load_chromosome_mapping(f"../data/species/{species}/assembly_to_chrom.tsv")
-
-# Decorate metadata
-df_meta = decorate_metadata(df_meta, df_chrom, df_mlst)
-df_meta
+    return parser.parse_args()
 
 
-# %%
-# Combined 4-panel plot
-fig, axes = plt.subplots(
-    2, 2, figsize=(12, 12), gridspec_kw={"height_ratios": [1, 1.7]}
-)
+if __name__ == "__main__":
+    args = parse_arguments()
 
-# Add general title with total number of assemblies
-fig.suptitle(f"{species} - {len(df_meta)} assemblies", fontsize=14, y=0.98)
+    # Load data
+    df_meta = load_metadata(args.metadata_file)
+    df_chrom = load_chromosome_mapping(args.chromosome_mapping_file)
 
-# 1. Assembly release date histogram
-ax = axes[0, 0]
-sns.histplot(df_meta["Assembly Release Date"].dt.year, discrete=True, ax=ax)
-ax.set_title("Assembly Release Date Distribution")
-ax.set_xlabel("Year")
-ax.set_ylabel("Count")
-ax.tick_params(axis="x")
+    # Load MLST if provided
+    df_mlst = None
+    if args.mlst_file:
+        df_mlst = load_mlst(args.mlst_file)
 
-# 2. Assembly N50 histogram
-ax = axes[0, 1]
-sns.ecdfplot(df_meta["Assembly Stats Contig N50"] / 1e6, ax=ax, stat="count")
-ax.set_title("Assembly N50 Distribution")
-ax.set_xlabel("N50 (Mbp)")
-ax.set_ylabel("Count")
+    # Combine metadata
+    df_combined = decorate_metadata(df_meta, df_chrom, df_mlst)
 
-# 3. MLST distribution
-ax = axes[1, 0]
-top_30_mlst = df_meta["MLST"].value_counts().head(30).index
-sns.countplot(data=df_meta, y="MLST", order=top_30_mlst, ax=ax)
-ax.set_title("MLST Distribution (Top 30)")
-ax.set_ylabel("MLST")
-ax.set_xlabel("Count")
-
-# 4. Countries distribution
-ax = axes[1, 1]
-df_meta_countries = df_meta[["Assembly BioSample Geographic location"]].copy()
-df_meta_countries["Assembly BioSample Geographic location"] = (
-    df_meta_countries["Assembly BioSample Geographic location"]
-    .str.split(":", n=1)
-    .str[0]
-)
-top_30_countries = (
-    df_meta_countries["Assembly BioSample Geographic location"]
-    .value_counts()
-    .head(30)
-    .index
-)
-sns.countplot(
-    data=df_meta_countries,
-    y="Assembly BioSample Geographic location",
-    order=top_30_countries,
-    ax=ax,
-)
-ax.set_title("Country Distribution (Top 30)")
-ax.set_ylabel("Country")
-ax.set_xlabel("Count")
-
-plt.tight_layout()
-plt.show()
-# %%
+    # Save combined metadata to output file
+    df_combined.to_csv(args.output)

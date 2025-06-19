@@ -1,13 +1,13 @@
-# Dataset creation pipeline
+# Microbial dataset download pipeline
 
-Pipeline to create a dataset of closely-related bacterial isolates. The pipeline:
+Pipeline to download and characterize complete bacterial genomes from NCBI RefSeq.
 
-- downloads all RefSeq sequences from a given species.
+Given a series of species, to be specified in the `config.yml` file, the pipeline:
+
+- downloads all `complete` RefSeq sequences from a given species.
 - performs MLST with [tseemann/mlst](https://github.com/tseemann/mlst)
-- and for a given desired sequence type and reference assembly:
-  - evaluates mash distance of the chromosome to the reference assembly chromosome
-  - selects all isolates with the specified sequence type, and at a mash distance smaller than a given threshold to the reference
-  - exports all chromosomes from the dataset, along with metadata
+- builds an approximate phylogeny using neighbour joining from mash distances using [attotree](https://github.com/karel-brinda/attotree)
+- produces a summary metadata table and figures.
 
 ## setup
 
@@ -15,7 +15,7 @@ The pipeline requires a working installation of conda/mamba and snakemake (the p
 For cluster execution, also the `snakemake-executor-plugin-slurm` needs to be installed.
 For convenience we provide the `snakemake_env.yml` from which the environment can be initialized.
 
-Optionally you can add your ncbi api key in a file named `ncbi_api_key.txt`.
+Optionally you can add your ncbi api key in a file named `ncbi_api_key.txt`. This is not required, but will speed up the download process. You can obtain an API key from [NCBI](https://www.ncbi.nlm.nih.gov/account/settings/).
 
 ## picking the dataset
 
@@ -27,22 +27,23 @@ species:
 
 mlst_scheme:
   saureus: "saureus"
-
-dsets:
-  saureus_ST5:
-    species: "saureus"
-    strain: "5"
-    ref_acc: "GCF_000009665.1"
-    threshold: 0.005
 ```
 
-In this case `saureus_ST5` is a new dataset label, the species corresponds to _Staphylococcus aureus_, as indicated in the `species` entry.
-The desired sequence type is ST5, as indicated by `strain`, with corresponding reference assembly `GCF_000009665.1`. All assemblies of this sequence type and at a mash distance of less than `0.005` will be retained in the dataset.
+In this case the pipeline will download the `saureus` dataset, corresponding to the _Staphylococcus aureus_ species.
+In the `species` dictionary you can specify for each dataset the search term for the taxonomy search in NCBI.
+The `mlst_scheme` dictionary specifies the MLST scheme to use for each dataset, which
+should correspond to one of the [available schemes](https://github.com/tseemann/mlst?tab=readme-ov-file#available-schemes) in the `tseemann/mlst` repository.
 
 ## running the pipeline
 
 All of the datasets can be downloaded with:
 
-```
+```sh
 snakemake all
+```
+
+Or for SLURM cluster execution:
+
+```sh
+snakemake all --profile profiles/slurm
 ```

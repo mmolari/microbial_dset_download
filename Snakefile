@@ -14,7 +14,6 @@ except:
     print("No NCBI API key found. Optionally add your key in ncbi_api_key.txt")
 
 
-dsets = config["dsets"]
 species = config["species"]
 
 
@@ -49,41 +48,12 @@ rule ref_to_chromosome:
         """
 
 
-# rule download_summary:
-#     output:
-#         "data/summary_info.json"
-#     conda:
-#         "envs/ncbi.yml"
-#     params:
-#         api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
-#     shell:
-#         """
-#         datasets summary genome taxon 'staphylococcus aureus' \
-#             {params.api} \
-#             --assembly-level complete \
-#             --assembly-source 'RefSeq' \
-#             --exclude-atypical \
-#             --exclude-multi-isolate \
-#             > {output}
-#         """
-
-
 rule download_dataset:
     output:
         "data/species/{species}/ncbi.zip",
     params:
         ncbi_sp=lambda w: species[w.species],
         api=f"--api-key {ncbi_api_key}" if ncbi_api_key else "",
-        emi=lambda w: (
-            ""
-            if (w.species in config["keep_multi_isolate"])
-            else "--exclude-multi-isolate"
-        ),
-        refsq=lambda w: (
-            "--annotated"
-            if (w.species in config["not_only_refseq"])
-            else "--assembly-source 'RefSeq'"
-        ),
     conda:
         "envs/ncbi.yml"
     shell:
@@ -91,9 +61,8 @@ rule download_dataset:
         datasets download genome taxon '{params.ncbi_sp}' \
             {params.api} \
             --assembly-level complete \
-            {params.refsq} \
+            --assembly-source 'RefSeq' \
             --exclude-atypical \
-            {params.emi} \
             --mag exclude \
             --filename {output}
         """
@@ -166,17 +135,47 @@ rule assembly_to_chrom_acc:
         """
 
 
-rule mash_dist:
+rule attotree:
     input:
         fas=rules.chromosome_fa.output,
-        ref=rules.ref_to_chromosome.output,
     output:
-        "data/species/{species}/mash_dist/{ref_acc}.tsv",
+        tree="data/species/{species}/attotree.nwk",
     conda:
-        "envs/mash.yml"
+        "envs/attotree.yml"
+    threads: 4
+    params:
+        k=21,
+        s=50000,
+        fof="data/species/{species}/attotree.fof",  # temporary file of filenames
     shell:
         """
-        mash dist -s 10000 {input.ref} {input.fas}/*.fa > {output}
+        # 1. Build the file-of-filenames once.
+        find {input.fas} -maxdepth 1 -name '*.fa' -print > {params.fof}
+
+        # 2. Run attotree in list-input mode.
+        attotree -L {params.fof} \
+                 -o {output.tree} \
+                 -t {threads} \
+                 -k {params.k} \
+                 -s {params.s}
+
+        # 3. Clean up the list file.
+        rm -f {params.fof}
+        """
+
+
+rule refine_tree:
+    input:
+        tree="data/species/{species}/attotree.nwk",
+    output:
+        "results/{species}/attotree.nwk",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/refine_tree.py \
+            --tree {input.tree} \
+            --out_tree {output}
         """
 
 
@@ -197,108 +196,71 @@ rule mlst:
         """
 
 
-rule fig_mash_dist:
+rule combine_metadata:
     input:
-        mash=lambda w: expand(
-            rules.mash_dist.output,
-            species=dsets[w.dset]["species"],
-            ref_acc=dsets[w.dset]["ref_acc"],
-        ),
-        mlst=lambda w: expand(
-            rules.mlst.output,
-            species=dsets[w.dset]["species"],
-        ),
+        metadata="data/species/{species}/info.tsv",
+        chrom="data/species/{species}/assembly_to_chrom.tsv",
+        mlst="data/species/{species}/mlst.tsv",
     output:
-        "results/datasets/{dset}/figs/mash_dist.pdf",
+        "results/{species}/combined_metadata.csv",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/combine_metadata.py \
+            --metadata_file {input.metadata} \
+            --chromosome_mapping_file {input.chrom} \
+            --mlst_file {input.mlst} \
+            --output {output}
+        """
+
+
+rule plot_metadata_overview:
+    input:
+        rules.combine_metadata.output,
+    output:
+        "results/{species}/metadata_overview.png",
     params:
-        st_num=lambda w: dsets[w.dset]["strain"],
-        thr=lambda w: dsets[w.dset]["threshold"],
+        species_name=lambda w: species[w.species],
     conda:
         "envs/bioinfo.yml"
     shell:
         """
-        python3 scripts/plot_mash_dist.py \
-            --mash {input.mash} \
-            --mlst {input.mlst} \
-            --ST_num {params.st_num} \
-            --threshold {params.thr} \
-            --out_fig {output}
+        python3 scripts/plot_metadata_overview.py \
+            --df {input} \
+            --species '{params.species_name}' \
+            --fig {output}
         """
 
 
-rule fig_ST:
+# Plot tree with metadata using plot_tree.py
+rule plot_tree:
     input:
-        lambda w: expand(rules.mlst.output, species=dsets[w.dset]["species"]),
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
     output:
-        "results/datasets/{dset}/figs/ST_distribution.pdf",
+        "results/{species}/tree_metadata.png",
     conda:
         "envs/bioinfo.yml"
     shell:
         """
-        python3 scripts/plot_ST.py \
-            --mlst {input} \
-            --out_fig {output}
+        python3 scripts/plot_tree.py \
+            --tree {input.tree} \
+            --metadata {input.metadata} \
+            --fig {output}
         """
 
 
-rule create_dset:
-    input:
-        mlst=lambda w: expand(rules.mlst.output, species=dsets[w.dset]["species"]),
-        mash=lambda w: expand(
-            rules.mash_dist.output,
-            species=dsets[w.dset]["species"],
-            ref_acc=dsets[w.dset]["ref_acc"],
-        ),
-        mtd=lambda w: expand(rules.info_to_tsv.output, species=dsets[w.dset]["species"]),
-        acm=lambda w: expand(
-            rules.assembly_to_chrom_acc.output, species=dsets[w.dset]["species"]
-        ),
-        fas=lambda w: expand(
-            rules.chromosome_fa.output, species=dsets[w.dset]["species"]
-        ),
-    output:
-        seqs=directory("results/datasets/{dset}/fa"),
-        mtd="results/datasets/{dset}/metadata.tsv",
-        mlst="results/datasets/{dset}/mlst.tsv",
-        acc_map="results/datasets/{dset}/assembly_to_chrom.tsv",
-    params:
-        thr=lambda w: dsets[w.dset]["threshold"],
-        st=lambda w: dsets[w.dset]["strain"],
-    conda:
-        "envs/bioinfo.yml"
+rule clean:
     shell:
         """
-        python3 scripts/create_dset.py \
-            --mlst {input.mlst} \
-            --mash {input.mash} \
-            --mtd {input.mtd} \
-            --acc_map {input.acm} \
-            --fas {input.fas} \
-            --ST {params.st} \
-            --threshold {params.thr} \
-            --out_dir {output.seqs} \
-            --out_mtd {output.mtd} \
-            --out_mlst {output.mlst} \
-            --out_acc_map {output.acc_map}
-        """
-
-
-rule fig_metadata:
-    input:
-        rules.create_dset.output.mtd,
-    output:
-        "results/datasets/{dset}/figs/metadata.pdf",
-    conda:
-        "envs/bioinfo.yml"
-    shell:
-        """
-        python3 scripts/plot_metadata.py --metadata {input} --out_fig {output}
+        rm -f results/*/metadata_overview.png
         """
 
 
 rule all:
     input:
-        expand(rules.fig_ST.output, dset=dsets.keys()),
-        expand(rules.fig_mash_dist.output, dset=dsets.keys()),
-        expand(rules.create_dset.output, dset=dsets.keys()),
-        expand(rules.fig_metadata.output, dset=dsets.keys()),
+        expand(rules.refine_tree.output, species=species),
+        expand(rules.combine_metadata.output, species=species),
+        expand(rules.plot_metadata_overview.output, species=species),
+        expand(rules.plot_tree.output, species=species),
