@@ -139,11 +139,11 @@ rule mash_triangle:
     input:
         rules.chromosome_fa.output,
     output:
-        "data/species/{species}/mash_triangle.tsv",
-    threads: 4
+        "results/{species}/mash_triangle.tsv",
     params:
         k=21,  # k-mer size
         s=50000,  # sketch size
+        cores=4,  # number of threads
     conda:
         "envs/mash.yml"
     shell:
@@ -151,7 +151,7 @@ rule mash_triangle:
         mash triangle \
             -k {params.k} \
             -s {params.s} \
-            -p {threads} \
+            -p {params.cores} \
             {input}/*.fa > {output}
         """
 
