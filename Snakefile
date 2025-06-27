@@ -135,6 +135,27 @@ rule assembly_to_chrom_acc:
         """
 
 
+rule mash_triangle:
+    input:
+        rules.chromosome_fa.output,
+    output:
+        "data/species/{species}/mash_triangle.tsv",
+    threads: 4
+    params:
+        k=21,  # k-mer size
+        s=50000,  # sketch size
+    conda:
+        "envs/mash.yml"
+    shell:
+        """
+        mash triangle \
+            -k {params.k} \
+            -s {params.s} \
+            -p {threads} \
+            {input}/*.fa > {output}
+        """
+
+
 rule attotree:
     input:
         fas=rules.chromosome_fa.output,
@@ -145,7 +166,7 @@ rule attotree:
     threads: 4
     params:
         k=21,
-        s=50000,
+        s=50000,  # sketch size
         fof="data/species/{species}/attotree.fof",  # temporary file of filenames
     shell:
         """
@@ -264,3 +285,4 @@ rule all:
         expand(rules.combine_metadata.output, species=species),
         expand(rules.plot_metadata_overview.output, species=species),
         expand(rules.plot_tree.output, species=species),
+        expand(rules.mash_triangle.output, species=species),
