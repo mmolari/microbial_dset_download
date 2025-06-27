@@ -4,3 +4,4 @@
 /.snakemake/
 __pycache__/
 /ncbi_api_key.txt
+/makefile
