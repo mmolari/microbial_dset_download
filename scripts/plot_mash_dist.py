@@ -1,16 +1,44 @@
-# %%
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
+import argparse
 import seaborn as sns
 import matplotlib.pyplot as plt
 from Bio import Phylo
 
-from sklearn.cluster import DBSCAN
 
-
-# %%
+def parse_arguments():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Plot mash distance analysis and tree with heatmap"
+    )
+    parser.add_argument(
+        "--mash-file", required=True, help="Path to mash triangle TSV file"
+    )
+    parser.add_argument(
+        "--tree-file",
+        required=True,
+        help="Path to phylogenetic tree file (Newick format)",
+    )
+    parser.add_argument(
+        "--metadata-file", required=True, help="Path to metadata CSV file"
+    )
+    parser.add_argument(
+        "--output-dist",
+        required=True,
+        help="Output filename for mash distance analysis figure",
+    )
+    parser.add_argument(
+        "--output-tree",
+        required=True,
+        help="Output filename for tree and heatmap figure",
+    )
+    parser.add_argument(
+        "--species",
+        required=True,
+        help="Species name",
+    )
+    return parser.parse_args()
 
 
 def parse_mash_triangle_output(file_path: str) -> pd.DataFrame:
@@ -101,90 +129,15 @@ def plot_tree(tree, df, ax):
     draw_MLST(tree, df, top_MLST, ax, positions)
 
 
-def cluster_distance_matrix(
-    distance_matrix: pd.DataFrame, eps: float, min_samples: int
-) -> np.ndarray:
-    """
-    Cluster a distance matrix using DBSCAN.
-
-    Args:
-        distance_matrix: Square DataFrame with pairwise distances
-        eps: Maximum distance between samples in the same neighborhood
-        min_samples: Minimum number of samples in a neighborhood for a core point
-
-    Returns:
-        Array of cluster labels (-1 for noise points)
-    """
-    db = DBSCAN(eps=eps, min_samples=min_samples, metric="precomputed")
-    return db.fit_predict(distance_matrix.values)
-
-
-# %%
-
-species = "saureus"
-
-fname = f"../results/{species}/mash_triangle.tsv"
-df = parse_mash_triangle_output(fname)
-
-# get order from the tree
-fname = f"../results/{species}/attotree.nwk"
-tree = Phylo.read(fname, "newick")
-order = [leaf.name for leaf in tree.get_terminals()]
-
-# reorder DataFrame
-df = df.reindex(index=order, columns=order)
-
-# get metadata
-fname = f"../results/{species}/combined_metadata.csv"
-info = pd.read_csv(
-    fname,
-    index_col=["chromosome_acc"],
-    parse_dates=["Assembly Release Date"],
-    dtype={"MLST": str},
-)
-
-# get the 95th percentile threshold for the heatmap
-high_threshold = np.quantile(df.values, 0.95)
-
-
-# Create subplots with tree on the left and heatmap on the right
-fig, (ax1, ax2) = plt.subplots(
-    1,
-    2,
-    figsize=(16, 8),
-    gridspec_kw={"width_ratios": [1, 2]},
-    sharey=True,
-)
-
-# Plot tree on the left
-plot_tree(tree, info, ax1)
-
-# Plot heatmap on the right
-sns.heatmap(
-    df,
-    ax=ax2,
-    cmap="viridis",
-    square=True,
-    cbar_kws={"label": "Mash distance"},
-    vmin=0,
-    vmax=high_threshold,
-    xticklabels=False,
-    yticklabels=False,
-)
-ax2.set_title("Mash Distances Heatmap")
-
-plt.tight_layout()
-plt.show()
-
-
-# %%
-def plot_mash_distance_analysis(df, info, top_n=20):
+def plot_mash_distance_analysis(df, info, svname, species, top_n=20):
     """
     Plot histogram and cumulative distributions of mash distances.
 
     Args:
         df: Mash distance matrix (DataFrame)
         info: Metadata DataFrame with MLST information
+        svname: Filename to save the figure
+        species: Species name for the plot title
         top_n: Number of top MLST types to include in cumulative plot
     """
     # Create figure with two subplots
@@ -245,49 +198,79 @@ def plot_mash_distance_analysis(df, info, top_n=20):
     ax2.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
     plt.tight_layout()
-    plt.show()
+    plt.suptitle(f"Mash Distance Analysis for {species}")
+    plt.subplots_adjust(top=0.85)  # Adjust top to make room for the
+    # suptitle
+    plt.savefig(svname, dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
 
-# Call the function
-plot_mash_distance_analysis(df, info)
+def plot_tree_and_heatmap(tree, df, info, high_threshold, svname):
+    """
+    Plot phylogenetic tree and mash distance heatmap side by side.
+
+    Args:
+        tree: Phylogenetic tree object
+        df: Mash distance matrix (DataFrame)
+        info: Metadata DataFrame with MLST information
+        high_threshold: Upper threshold for heatmap color scale
+        svname: Filename to save the figure
+    """
+    # Create subplots with tree on the left and heatmap on the right
+    fig, (ax1, ax2) = plt.subplots(
+        1,
+        2,
+        figsize=(16, 8),
+        gridspec_kw={"width_ratios": [1, 2]},
+        sharey=True,
+    )
+
+    # Plot tree on the left
+    plot_tree(tree, info, ax1)
+
+    # Plot heatmap on the right
+    sns.heatmap(
+        df,
+        ax=ax2,
+        cmap="viridis",
+        square=True,
+        cbar_kws={"label": "Mash distance"},
+        vmin=0,
+        vmax=high_threshold,
+        xticklabels=False,
+        yticklabels=False,
+    )
+    ax2.set_title("Mash Distances Heatmap")
+
+    plt.tight_layout()
+    plt.savefig(svname, dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
 
-# %%
-# cluster labels
-labels = cluster_distance_matrix(df, eps=0.002, min_samples=10)
+if __name__ == "__main__":
+    args = parse_arguments()
 
-# create a dataframe with cluster labels and MLST
-cluster_df = pd.DataFrame(
-    {
-        "MLST": info["MLST"],
-        "Cluster": labels,
-    },
-    index=info.index,
-)
+    df = parse_mash_triangle_output(args.mash_file)
 
-# Get MLST counts and assign -1 to those with less than 10 elements
-mlst_counts = cluster_df["MLST"].value_counts()
-small_mlst = mlst_counts[mlst_counts < 10].index
-cluster_df.loc[cluster_df["MLST"].isin(small_mlst), "MLST"] = "rest"
+    tree = Phylo.read(args.tree_file, "newick")
+    order = [leaf.name for leaf in tree.get_terminals()]
 
-# visualize confusion matrix
-confusion_matrix = pd.crosstab(
-    cluster_df["MLST"],
-    cluster_df["Cluster"],
-    # margins=True,
-    # normalize="columns",
-)
-plt.figure(figsize=(12, 8))
-sns.heatmap(
-    confusion_matrix,
-    annot=True,
-    cmap="Blues",
-    cbar_kws={"label": "Count"},
-)
-plt.title("Confusion Matrix of MLST vs Cluster Labels")
-plt.xlabel("Cluster Labels")
-plt.ylabel("MLST")
-plt.tight_layout()
-plt.show()
+    # reorder DataFrame
+    df = df.reindex(index=order, columns=order)
 
-# %%
+    # get metadata
+    info = pd.read_csv(
+        args.metadata_file,
+        index_col=["chromosome_acc"],
+        parse_dates=["Assembly Release Date"],
+        dtype={"MLST": str},
+    )
+
+    # get the 95th percentile threshold for the heatmap
+    high_threshold = np.quantile(df.values, 0.95)
+
+    # Plot mash distance analysis
+    plot_mash_distance_analysis(df, info, args.output_dist, args.species)
+
+    # Plot tree and heatmap
+    plot_tree_and_heatmap(tree, df, info, high_threshold, args.output_tree)

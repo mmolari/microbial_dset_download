@@ -272,6 +272,29 @@ rule plot_tree:
         """
 
 
+# Plot mash distance analysis using plot_mash_dist.py
+rule plot_mash_dist:
+    input:
+        mash=rules.mash_triangle.output,
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        dist="results/{species}/mash_dist_distr.png",
+        tree_heatmap="results/{species}/mash_dist_heatmap.png",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_mash_dist.py \
+            --mash-file {input.mash} \
+            --tree-file {input.tree} \
+            --metadata-file {input.metadata} \
+            --output-dist {output.dist} \
+            --output-tree {output.tree_heatmap} \
+            --species {wildcards.species}
+        """
+
+
 rule clean:
     shell:
         """
@@ -286,3 +309,4 @@ rule all:
         expand(rules.plot_metadata_overview.output, species=species),
         expand(rules.plot_tree.output, species=species),
         expand(rules.mash_triangle.output, species=species),
+        expand(rules.plot_mash_dist.output, species=species),
