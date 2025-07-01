@@ -301,11 +301,11 @@ rule cluster_ST:
         tree=rules.refine_tree.output,
         metadata=rules.combine_metadata.output,
     output:
-        figs=directory("clusters/{species}/figs"),
-        clusters=directory("clusters/{species}/clusters"),
+        figs=directory("clusters/{species}/ST_figs"),
+        clusters=directory("clusters/{species}/ST_clusters"),
     params:
         thr_size=20,
-        false_positive_penalty=0.5,
+        false_positive_penalty=0.25,
     conda:
         "envs/bioinfo.yml"
     shell:

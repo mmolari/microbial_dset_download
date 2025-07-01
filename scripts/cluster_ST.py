@@ -200,7 +200,9 @@ def plot_selected_clade_in_tree(root, best_node, info, species, ST, svfile):
 
 def display_results(nodes_df, clade_root, info_df, svfld, ST, species):
     # display ROC curve
-    precision_recall_plot(nodes_df, ST, species, svfld / f"ST_{ST}_ROC.png")
+    precision_recall_plot(
+        nodes_df, ST, species, svfld / f"ST_{ST}_precision_recall.png"
+    )
     # and sub-tree
     best_node = nodes_df.iloc[0]["node"]
     svfile = svfld / f"ST_{ST}_clade_selection.png"
@@ -232,9 +234,10 @@ def save_results(clade_root, info, mash_dist, svfld, ST, species):
         "ST": ST,
         "n_isolates": len(iso_names),
         "n_ST_isolates": int(clade_MLST_counts[ST]),
-        "all_ST": [
-            (int(ct), int(all_MLST_counts[st])) for st, ct in clade_MLST_counts.items()
-        ],
+        "all_ST": {
+            st: (int(ct), int(all_MLST_counts[st]))
+            for st, ct in clade_MLST_counts.items()
+        },
         "mean_mash_dist": mean_mash_dist,
         "std_mash_dist": std_mash_dist,
     }
