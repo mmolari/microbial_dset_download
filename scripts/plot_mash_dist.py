@@ -172,26 +172,21 @@ def plot_mash_distance_analysis(df, info, svname, species, top_n=20):
 
             sns.ecdfplot(
                 distances,
-                label=f"MLST {mlst}",
+                label=f"MLST {mlst} (n={len(mlst_samples)})",
                 color=cmap(i % 20),
-                stat="proportion",
                 ax=ax2,
             )
-
-    # freeze x-limits
-    xlim = ax2.get_xlim()
 
     mask = np.triu(np.ones_like(df, dtype=bool), k=1)
     sns.ecdfplot(
         df.values[mask],
         label="All Samples",
         color="black",
-        stat="proportion",
         linestyle="--",
         ax=ax2,
     )
 
-    ax2.set_xlim(xlim)
+    ax2.set_xscale("log")
     ax2.set_xlabel("Mash Distance")
     ax2.set_ylabel("Cumulative Probability")
     ax2.set_title("Cumulative Distribution of Mash Distances by Sequence Type")
