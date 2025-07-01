@@ -234,6 +234,7 @@ def save_results(clade_root, info, mash_dist, svfld, ST, species):
         "ST": ST,
         "n_isolates": len(iso_names),
         "n_ST_isolates": int(clade_MLST_counts[ST]),
+        "ST_completeness": clade_MLST_counts[ST] / all_MLST_counts[ST],
         "all_ST": {
             st: (int(ct), int(all_MLST_counts[st]))
             for st, ct in clade_MLST_counts.items()
@@ -251,7 +252,7 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     # Load data
-    tree, df, info = load_data(args.mash_file, args.tree_file, args.metadata_file)
+    tree, mash_df, info = load_data(args.mash_file, args.tree_file, args.metadata_file)
 
     # create output directories if they do not exist
     figs_fld = Path(args.output_figs)
@@ -289,4 +290,5 @@ if __name__ == "__main__":
         display_results(nodes_df, st_root, info, figs_fld, ST, args.species)
 
         # save results
-        save_results(st_root, info, df, clusters_fld, ST, args.species)
+        clade_root = best_node["node"]
+        save_results(clade_root, info, mash_df, clusters_fld, ST, args.species)
