@@ -7,7 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from Bio import Phylo
 
-from utils_04 import parse_mash_triangle_output, get_xy_positions
+from utils_04 import get_xy_positions, load_data
 
 
 def get_top_MLST(df, top_n=30):
@@ -48,39 +48,6 @@ def draw_MLST(tree, df, top_mlst, ax, color_label):
 
 
 # %%
-
-
-def load_data(mash_file, tree_file, metadata_file):
-    """Load and process mash distance data, phylogenetic tree, and metadata.
-
-    Args:
-        mash_file: Path to mash triangle output file
-        tree_file: Path to phylogenetic tree file in newick format
-        metadata_file: Path to combined metadata CSV file
-
-    Returns:
-        tuple: (tree, df, info) where tree is the phylogenetic tree,
-               df is the reordered mash distance matrix, and info is the metadata
-    """
-    # Load mash distance data
-    df = parse_mash_triangle_output(mash_file)
-
-    # Load phylogenetic tree
-    tree = Phylo.read(tree_file, "newick")
-    order = [leaf.name for leaf in tree.get_terminals()]
-
-    # Reorder DataFrame according to tree order
-    df = df.reindex(index=order, columns=order)
-
-    # Load metadata
-    info = pd.read_csv(
-        metadata_file,
-        index_col=["chromosome_acc"],
-        parse_dates=["Assembly Release Date"],
-        dtype={"MLST": str},
-    )
-
-    return tree, df, info
 
 
 species = "hpylori"
