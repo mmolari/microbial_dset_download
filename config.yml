@@ -25,7 +25,7 @@ mlst_scheme:
   spyogenes: "spyogenes"
   sflexneri: "ecoli"
   vcholerae: "vcholerae"
-  senterica: "senterica"
+  senterica: "senterica_achtman_2"
 
 clustering_thresholds:
   ecoli: 0.005
