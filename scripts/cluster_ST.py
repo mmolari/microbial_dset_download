@@ -155,6 +155,9 @@ def mark_MLST(root, info_df, ax):
     positions = get_xy_positions(root)
     for clade in root.get_terminals():
         mlst = df.loc[clade.name, "MLST"]
+        # if mlst is an empty string, skip
+        if pd.isna(mlst) or mlst == "":
+            continue
         x, y = positions[clade.name]
         ax.plot(x, y, ".", color=mlst_colors[mlst])
     # add legend
