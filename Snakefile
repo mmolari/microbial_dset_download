@@ -295,6 +295,33 @@ rule plot_mash_dist:
         """
 
 
+rule cluster_ST:
+    input:
+        mash=rules.mash_triangle.output,
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        figs=directory("clusters/{species}/figs"),
+        clusters=directory("clusters/{species}/clusters"),
+    params:
+        thr_size=20,
+        false_positive_penalty=0.5,
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/cluster_ST.py \
+            --mash-file {input.mash} \
+            --tree-file {input.tree} \
+            --metadata-file {input.metadata} \
+            --thr-size {params.thr_size} \
+            --false-positive-penalty {params.false_positive_penalty} \
+            --output-figs {output.figs} \
+            --output-clusters {output.clusters} \
+            --species {wildcards.species}
+        """
+
+
 rule clean:
     shell:
         """
@@ -310,3 +337,8 @@ rule all:
         expand(rules.plot_tree.output, species=species),
         expand(rules.mash_triangle.output, species=species),
         expand(rules.plot_mash_dist.output, species=species),
+
+
+rule cluster_all:
+    input:
+        expand(rules.cluster_ST.output, species=species),
