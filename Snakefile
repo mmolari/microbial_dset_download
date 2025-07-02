@@ -322,6 +322,35 @@ rule cluster_ST:
         """
 
 
+rule cluster_hdbscan:
+    input:
+        mash=rules.mash_triangle.output,
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        figs=directory("clusters/{species}/hdbscan_figs"),
+        clusters=directory("clusters/{species}/hdbscan_clusters"),
+    params:
+        eps=lambda w: config["clustering"]["hdbscan_eps_thrshold"][w.species],
+        thr_size=20,
+        assignment_threshold_freq=0.80,
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/cluster_hdbscan.py \
+            --mash-file {input.mash} \
+            --tree-file {input.tree} \
+            --metadata-file {input.metadata} \
+            --eps {params.eps} \
+            --thr-size {params.thr_size} \
+            --output-figs {output.figs} \
+            --output-clusters {output.clusters} \
+            --species {wildcards.species} \
+            --assignment-threshold-freq {params.assignment_threshold_freq}
+        """
+
+
 rule clean:
     shell:
         """
@@ -342,3 +371,4 @@ rule all:
 rule cluster_all:
     input:
         expand(rules.cluster_ST.output, species=species),
+        expand(rules.cluster_hdbscan.output, species=species),

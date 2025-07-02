@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from Bio import Phylo
 
 
 def parse_mash_triangle_output(file_path: str) -> pd.DataFrame:
@@ -34,6 +35,39 @@ def parse_mash_triangle_output(file_path: str) -> pd.DataFrame:
 
     # wrap in DataFrame
     return pd.DataFrame(mat, index=ids, columns=ids)
+
+
+def load_data(mash_file, tree_file, metadata_file):
+    """Load and process mash distance data, phylogenetic tree, and metadata.
+
+    Args:
+        mash_file: Path to mash triangle output file
+        tree_file: Path to phylogenetic tree file in newick format
+        metadata_file: Path to combined metadata CSV file
+
+    Returns:
+        tuple: (tree, df, info) where tree is the phylogenetic tree,
+               df is the reordered mash distance matrix, and info is the metadata
+    """
+    # Load mash distance data
+    mash_df = parse_mash_triangle_output(mash_file)
+
+    # Load phylogenetic tree
+    tree = Phylo.read(tree_file, "newick")
+    order = [leaf.name for leaf in tree.get_terminals()]
+
+    # Reorder DataFrame according to tree order
+    mash_df = mash_df.reindex(index=order, columns=order)
+
+    # Load metadata
+    info = pd.read_csv(
+        metadata_file,
+        index_col=["chromosome_acc"],
+        parse_dates=["Assembly Release Date"],
+        dtype={"MLST": str},
+    )
+
+    return tree, mash_df, info
 
 
 def get_xy_positions(tree):
