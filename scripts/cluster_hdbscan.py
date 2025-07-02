@@ -219,7 +219,7 @@ def plot_clustering_benchmark(
                 x="eps",
                 y=metric,
                 label=metric_labels[metric],
-                marker="o",
+                marker=".",
                 ax=ax,
             )
         ax.set_ylim(bottom=0)
@@ -452,7 +452,7 @@ if __name__ == "__main__":
 
     # benchmark clustering performance
     print("Benchmarking clustering performance...")
-    eps_values = np.logspace(-3.5, -1.5, 25)
+    eps_values = np.logspace(-5, -1.5, 100)
     clust_benchmark = clustering_benchmark_df(
         eps_values=eps_values, mlst_series=mlst_series, mash_df=mash_df
     )
