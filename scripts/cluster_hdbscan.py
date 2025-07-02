@@ -118,7 +118,7 @@ def cluster_distance_matrix_hdbscan(
 
 
 def evaluate_clustering(
-    eps: float, mlst_series: pd.Series, mash_df: pd.DataFrame
+    eps: float, mlst_series: pd.Series, mash_df: pd.DataFrame, min_size: int
 ) -> tuple:
     """
     Evaluate clustering performance for a given epsilon value.
@@ -129,7 +129,9 @@ def evaluate_clustering(
     Returns:
         tuple: (clustering_results_dict, labels_series)
     """
-    labels_series = cluster_distance_matrix_hdbscan(mash_df, eps=eps, min_samples=10)
+    labels_series = cluster_distance_matrix_hdbscan(
+        mash_df, eps=eps, min_samples=min_size
+    )
     cluster_df = pd.concat(
         {
             "MLST": mlst_series,
@@ -160,7 +162,9 @@ def evaluate_clustering(
     return clustering_results, cluster_df
 
 
-def clustering_benchmark_df(eps_values, mlst_series, mash_df):
+def clustering_benchmark_df(
+    eps_values, mlst_series, mash_df, min_size: int
+) -> pd.DataFrame:
     """
     Create a DataFrame to benchmark clustering performance across multiple epsilon values.
 
@@ -174,14 +178,14 @@ def clustering_benchmark_df(eps_values, mlst_series, mash_df):
     """
     results = []
     for eps in eps_values:
-        clustering_results, _ = evaluate_clustering(eps, mlst_series, mash_df)
+        clustering_results, _ = evaluate_clustering(eps, mlst_series, mash_df, min_size)
         results.append(clustering_results)
 
     return pd.DataFrame(results)
 
 
 def plot_clustering_benchmark(
-    clustering_results: pd.DataFrame, best_eps: float, svname: str
+    clustering_results: pd.DataFrame, best_eps: float, thr_size: int, svname: str
 ):
     """
     Plot clustering results for different epsilon values.
@@ -193,7 +197,7 @@ def plot_clustering_benchmark(
         "nmi": "Normalized Mutual Information",
         "ari": "Adjusted Rand Index",
         "num_clusters": "Number of Clusters",
-        "num_mlst": "Number of large (>10) MLST Types",
+        "num_mlst": f"Number of large (>{thr_size}) MLST Types",
         "num_samples": "Total isolates",
         "num_samples_in_clusters": "N. isolates in Clusters",
         "num_samples_in_mlst": "N. isolates in MLST Types",
@@ -261,7 +265,7 @@ def plot_confusion_matrix(
         confusion_matrix,
         # annot=True,
         cmap="Greys",
-        cbar_kws={"label": "Proportion"},
+        cbar_kws={"label": "proportion of MLST isolates"},
         linewidths=0.5,
         linecolor="black",
     )
@@ -366,6 +370,9 @@ def summary_stats(
         if ct / len(isolates) > assignment_threshold:
             st_assignment = st
     st_majority = mlst_cluster.index[0] if len(mlst_cluster) > 0 else ""
+    # frequency of the most common ST in the cluster
+    st_max_freq = mlst_cluster.max() if len(mlst_cluster) > 0 else 0
+    st_max_freq /= len(isolates)
 
     summary_stats = {
         "num_isolates": len(isolates),
@@ -376,6 +383,7 @@ def summary_stats(
         "ST_included": st_included,  # list of STs included in the cluster
         "ST_all": st_dict,  # dictionary of STs with counts in the cluster and total
         "ST_majority": st_majority,  # most frequent ST in the cluster
+        "ST_max_freq": st_max_freq,  # frequency of the most common ST in the cluster
         "ST_n_different": len(mlst_cluster),  # number of different STs in the cluster
         "ST_n_isolates_with_type": int(
             mlst_cluster.sum()
@@ -448,23 +456,26 @@ if __name__ == "__main__":
     mash_distance_overview(mash_df, info, args.eps, fname)
 
     # Refine MLST series
-    mlst_series = refined_mlst_series(info, thr_size=10)
+    mlst_series = refined_mlst_series(info, thr_size=args.thr_size)
 
     # benchmark clustering performance
     print("Benchmarking clustering performance...")
     eps_values = np.logspace(-5, -1.5, 100)
     clust_benchmark = clustering_benchmark_df(
-        eps_values=eps_values, mlst_series=mlst_series, mash_df=mash_df
+        eps_values=eps_values,
+        mlst_series=mlst_series,
+        mash_df=mash_df,
+        min_size=args.thr_size,
     )
 
     # Display clustering benchmark results
     print("Plotting clustering benchmark results...")
     fname = figs_fld / "cl_clustering_benchmark.png"
-    plot_clustering_benchmark(clust_benchmark, args.eps, fname)
+    plot_clustering_benchmark(clust_benchmark, args.eps, args.thr_size, fname)
 
     # calculate best clustering
     clust_res, clust_df = evaluate_clustering(
-        eps=args.eps, mlst_series=mlst_series, mash_df=mash_df
+        eps=args.eps, mlst_series=mlst_series, mash_df=mash_df, min_size=args.thr_size
     )
 
     # plot confusion matrix
