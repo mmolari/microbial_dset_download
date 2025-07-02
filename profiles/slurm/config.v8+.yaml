@@ -18,3 +18,15 @@ set-resources:
   cluster_ST:
     slurm_extra: "'--qos=30min'"
     runtime: 29m
+  plot_mash_dist:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  plot_tree:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  plot_metadata_overview:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  refine_tree:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
