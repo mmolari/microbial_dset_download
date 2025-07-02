@@ -8,6 +8,9 @@ Given a series of species, to be specified in the `config.yml` file, the pipelin
 - performs MLST with [tseemann/mlst](https://github.com/tseemann/mlst)
 - builds an approximate phylogeny using neighbour joining from mash distances using [attotree](https://github.com/karel-brinda/attotree)
 - produces a summary metadata table and figures.
+- optionally, by running the `cluster_all` target, clusters genomes creating clades of closely related isolates with two methods:
+  - selecting internal nodes of the approximate phylogenetic tree that are associated to a particular Sequence Type.
+  - clustering the genomes using HDBSCAN on the mash distances, picking a threshold parameter that makes the clustering compatible with the MLST scheme used.
 
 ## setup
 
@@ -47,3 +50,5 @@ Or for SLURM cluster execution:
 ```sh
 snakemake all --profile profiles/slurm
 ```
+
+Substitute `all` with `cluster_all` to run the clustering step, which will create a directory `clusters/` with the clustering results.
