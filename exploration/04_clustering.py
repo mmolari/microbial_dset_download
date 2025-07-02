@@ -7,7 +7,7 @@ from collections import defaultdict
 import seaborn as sns
 import matplotlib.pyplot as plt
 from Bio import Phylo
-from sklearn.cluster import HDBSCAN
+from sklearn.cluster import HDBSCAN, DBSCAN
 
 
 from utils_04 import get_xy_positions, load_data
@@ -62,7 +62,7 @@ def draw_MLST(tree, series, ax):
     )
 
 
-def cluster_distance_matrix(
+def cluster_distance_matrix_hdbscan(
     distance_matrix: pd.DataFrame, eps: float, min_samples: int
 ) -> pd.Series:
     """
@@ -79,6 +79,23 @@ def cluster_distance_matrix(
     return labels_series
 
 
+# def cluster_distance_matrix_dbscan(
+#     distance_matrix: pd.DataFrame, eps: float, min_samples: int
+# ) -> pd.Series:
+#     """
+#     Cluster a distance matrix using DBSCAN.
+#     """
+#     db = DBSCAN(
+#         eps=eps,
+#         min_samples=min_samples,
+#         metric="precomputed",
+#     )
+#     labels = db.fit_predict(distance_matrix.values)
+#     # create a pandas Series with the labels
+#     labels_series = pd.Series(labels, index=distance_matrix.index)
+#     return labels_series
+
+
 def evaluate_clustering(eps: float) -> tuple[dict, pd.Series]:
     """
     Evaluate clustering performance for a given epsilon value.
@@ -89,7 +106,7 @@ def evaluate_clustering(eps: float) -> tuple[dict, pd.Series]:
     Returns:
         tuple: (clustering_results_dict, labels_series)
     """
-    labels_series = cluster_distance_matrix(mash_df, eps=eps, min_samples=10)
+    labels_series = cluster_distance_matrix_hdbscan(mash_df, eps=eps, min_samples=10)
     cluster_df = pd.concat(
         {
             "MLST": mlst_conf_series,
@@ -169,7 +186,7 @@ def plot_clustering_results(clustering_results: pd.DataFrame, best_eps: float):
 # %%
 
 # species = "hpylori"
-species = "ecoli"
+species = "paeruginosa"
 
 mash_fname = f"../results/{species}/mash_triangle.tsv"
 tree_fname = f"../results/{species}/attotree.nwk"
@@ -179,9 +196,9 @@ best_eps_dict = {
     "bpertussis": 0.005,
     "ecoli": 0.003,
     "hpylori": 0.005,
-    "kpneumoniae": 0.005,
+    "kpneumoniae": 0.002,
     "mtuberculosis": 0.005,
-    "paeruginosa": 0.005,
+    "paeruginosa": 0.004,
     "saureus": 0.005,
     "sflexneri": 0.005,
     "spneumoniae": 0.005,
@@ -221,12 +238,13 @@ mlst_conf_series.fillna("NA", inplace=True)
 
 
 clustering_results = []
-for eps in np.logspace(-3, -1, 20):
+for eps in np.logspace(-3.5, -1.5, 25):
     results, _ = evaluate_clustering(eps)
     clustering_results.append(results)
 # Convert results to DataFrame
 clustering_results_df = pd.DataFrame(clustering_results)
 plot_clustering_results(clustering_results_df, best_eps=best_eps)
+
 # %%
 
 
@@ -239,12 +257,19 @@ confusion_matrix = pd.crosstab(
     cluster_df["Cluster"],
     # margins=True,
     normalize="index",  # Normalize by row to get proportions
+    # normalize="columns",  # Normalize by column to get proportions
 )
+
+ordered_mlst = cluster_df["MLST"].value_counts().index.tolist()
+ordered_clusters = cluster_df["Cluster"].value_counts().index.tolist()
+confusion_matrix = confusion_matrix.reindex(ordered_mlst, axis=0)
+confusion_matrix = confusion_matrix.reindex(ordered_clusters, axis=1)
+
 plt.figure(figsize=(12, 8))
 sns.heatmap(
     confusion_matrix,
     # annot=True,
-    cmap="Blues",
+    cmap="Greys",
     cbar_kws={"label": "Proportion"},
     linewidths=0.5,
     linecolor="black",
@@ -256,6 +281,9 @@ plt.xlabel("Cluster Labels")
 plt.ylabel("MLST")
 plt.tight_layout()
 plt.show()
+
+# %%
+
 
 fig, axs = plt.subplots(1, 2, figsize=(12, 20))
 
