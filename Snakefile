@@ -331,7 +331,7 @@ rule cluster_hdbscan:
         figs=directory("clusters/{species}/hdbscan_figs"),
         clusters=directory("clusters/{species}/hdbscan_clusters"),
     params:
-        eps=lambda w: config["clustering"]["hdbscan_eps_thrshold"][w.species],
+        eps=lambda w: config["clustering"]["hdbscan_eps_threshold"][w.species],
         thr_size=20,
         assignment_threshold_freq=0.80,
     conda:

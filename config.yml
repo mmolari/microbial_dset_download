@@ -28,7 +28,7 @@ mlst_scheme:
   senterica: "senterica_achtman_2"
 
 clustering:
-  hdbscan_eps_thrshold:
+  hdbscan_eps_threshold:
     ecoli: 0.003
     saureus: 0.0015
     hpylori: 0.001

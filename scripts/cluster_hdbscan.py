@@ -376,7 +376,7 @@ def summary_stats(
         "ST_included": st_included,  # list of STs included in the cluster
         "ST_all": st_dict,  # dictionary of STs with counts in the cluster and total
         "ST_majority": st_majority,  # most frequent ST in the cluster
-        "ST_n_diffent": len(mlst_cluster),  # number of different STs in the cluster
+        "ST_n_different": len(mlst_cluster),  # number of different STs in the cluster
         "ST_n_isolates_with_type": int(
             mlst_cluster.sum()
         ),  # number of isolates with STs in the cluster

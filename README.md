@@ -14,7 +14,7 @@ Given a series of species, to be specified in the `config.yml` file, the pipelin
 
 ## setup
 
-The pipeline requires a working installation of conda/mamba and snakemake (the pipleine was designed for v8.10.8).
+The pipeline requires a working installation of conda/mamba and snakemake (the pipeline was designed for v8.10.8).
 For cluster execution, also the `snakemake-executor-plugin-slurm` needs to be installed.
 For convenience we provide the `snakemake_env.yml` from which the environment can be initialized.
 
