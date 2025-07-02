@@ -12,3 +12,9 @@ default-resources:
 set-resources:
   mash_triangle:
     cpus_per_task: 4
+  cluster_hdbscan:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  cluster_ST:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
