@@ -1,4 +1,5 @@
-name: bioinfo
+name: 
+  /home/marco/Documents/code/microbial_dset_download/.snakemake/conda/d7cbe2f91de046b795c5a2214161bd68_
 channels:
   - bioconda
   - conda-forge
@@ -14,9 +15,9 @@ dependencies:
   - brotli=1.1.0
   - brotli-bin=1.1.0
   - bzip2=1.0.8
-  - ca-certificates=2024.2.2
+  - ca-certificates=2025.6.15
   - cairo=1.18.0
-  - certifi=2024.2.2
+  - certifi=2025.6.15
   - click=8.1.7
   - comm=0.2.1
   - contourpy=1.2.0
@@ -49,6 +50,7 @@ dependencies:
   - ipykernel=6.29.2
   - ipython=8.21.0
   - jedi=0.19.1
+  - joblib=1.5.1
   - jupyter_client=8.6.0
   - jupyter_core=5.7.1
   - k8=0.2.5
@@ -74,12 +76,13 @@ dependencies:
   - libexpat=2.5.0
   - libffi=3.4.2
   - libflac=1.4.3
-  - libgcc-ng=13.2.0
+  - libgcc=15.1.0
+  - libgcc-ng=15.1.0
   - libgcrypt=1.10.3
   - libgfortran-ng=13.2.0
   - libgfortran5=13.2.0
   - libglib=2.78.4
-  - libgomp=13.2.0
+  - libgomp=15.1.0
   - libgpg-error=1.47
   - libiconv=1.17
   - libjpeg-turbo=3.0.0
@@ -94,7 +97,8 @@ dependencies:
   - libsndfile=1.2.2
   - libsodium=1.0.18
   - libsqlite=3.45.1
-  - libstdcxx-ng=13.2.0
+  - libstdcxx=15.1.0
+  - libstdcxx-ng=15.1.0
   - libsystemd0=255
   - libtiff=4.6.0
   - libuuid=2.38.1
@@ -116,13 +120,13 @@ dependencies:
   - mysql-common=8.0.33
   - mysql-libs=8.0.33
   - ncbi-datasets-cli=16.15.0
-  - ncurses=6.4
+  - ncurses=6.4.20240210
   - nest-asyncio=1.6.0
   - nspr=4.35
   - nss=3.98
   - numpy=1.26.4
   - openjpeg=2.5.0
-  - openssl=3.3.0
+  - openssl=3.5.1
   - packaging=23.2
   - pandas=2.2.1
   - parso=0.8.3
@@ -155,6 +159,7 @@ dependencies:
   - pyzmq=25.1.2
   - qt-main=5.15.8
   - readline=8.2
+  - scikit-learn=1.7.0
   - scipy=1.12.0
   - seaborn=0.13.2
   - seaborn-base=0.13.2
@@ -165,6 +170,7 @@ dependencies:
   - statsmodels=0.14.1
   - tabulate=0.9.0
   - tenacity=8.3.0
+  - threadpoolctl=3.6.0
   - tk=8.6.13
   - toml=0.10.2
   - tomli=2.0.1
@@ -197,6 +203,5 @@ dependencies:
   - zipp=3.17.0
   - zlib=1.2.13
   - zstd=1.5.5
-  - pip:
-    - networkx==2.8.4
-    - git+https://github.com/mmolari/pypangraph@0.1.1
+prefix: 
+  /home/marco/Documents/code/microbial_dset_download/.snakemake/conda/d7cbe2f91de046b795c5a2214161bd68_

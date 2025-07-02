@@ -135,6 +135,27 @@ rule assembly_to_chrom_acc:
         """
 
 
+rule mash_triangle:
+    input:
+        rules.chromosome_fa.output,
+    output:
+        "results/{species}/mash_triangle.tsv",
+    params:
+        k=21,  # k-mer size
+        s=50000,  # sketch size
+        cores=4,  # number of threads
+    conda:
+        "envs/mash.yml"
+    shell:
+        """
+        mash triangle \
+            -k {params.k} \
+            -s {params.s} \
+            -p {params.cores} \
+            {input}/*.fa > {output}
+        """
+
+
 rule attotree:
     input:
         fas=rules.chromosome_fa.output,
@@ -145,7 +166,7 @@ rule attotree:
     threads: 4
     params:
         k=21,
-        s=50000,
+        s=50000,  # sketch size
         fof="data/species/{species}/attotree.fof",  # temporary file of filenames
     shell:
         """
@@ -251,6 +272,85 @@ rule plot_tree:
         """
 
 
+# Plot mash distance analysis using plot_mash_dist.py
+rule plot_mash_dist:
+    input:
+        mash=rules.mash_triangle.output,
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        dist="results/{species}/mash_dist_distr.png",
+        tree_heatmap="results/{species}/mash_dist_heatmap.png",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/plot_mash_dist.py \
+            --mash-file {input.mash} \
+            --tree-file {input.tree} \
+            --metadata-file {input.metadata} \
+            --output-dist {output.dist} \
+            --output-tree {output.tree_heatmap} \
+            --species {wildcards.species}
+        """
+
+
+rule cluster_ST:
+    input:
+        mash=rules.mash_triangle.output,
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        figs=directory("clusters/{species}/ST_figs"),
+        clusters=directory("clusters/{species}/ST_clusters"),
+    params:
+        thr_size=20,
+        false_positive_penalty=0.25,
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/cluster_ST.py \
+            --mash-file {input.mash} \
+            --tree-file {input.tree} \
+            --metadata-file {input.metadata} \
+            --thr-size {params.thr_size} \
+            --false-positive-penalty {params.false_positive_penalty} \
+            --output-figs {output.figs} \
+            --output-clusters {output.clusters} \
+            --species {wildcards.species}
+        """
+
+
+rule cluster_hdbscan:
+    input:
+        mash=rules.mash_triangle.output,
+        tree=rules.refine_tree.output,
+        metadata=rules.combine_metadata.output,
+    output:
+        figs=directory("clusters/{species}/hdbscan_figs"),
+        clusters=directory("clusters/{species}/hdbscan_clusters"),
+    params:
+        eps=lambda w: config["clustering"]["hdbscan_eps_threshold"][w.species],
+        thr_size=20,
+        assignment_threshold_freq=0.80,
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/cluster_hdbscan.py \
+            --mash-file {input.mash} \
+            --tree-file {input.tree} \
+            --metadata-file {input.metadata} \
+            --eps {params.eps} \
+            --thr-size {params.thr_size} \
+            --output-figs {output.figs} \
+            --output-clusters {output.clusters} \
+            --species {wildcards.species} \
+            --assignment-threshold-freq {params.assignment_threshold_freq}
+        """
+
+
 rule clean:
     shell:
         """
@@ -264,3 +364,11 @@ rule all:
         expand(rules.combine_metadata.output, species=species),
         expand(rules.plot_metadata_overview.output, species=species),
         expand(rules.plot_tree.output, species=species),
+        expand(rules.mash_triangle.output, species=species),
+        expand(rules.plot_mash_dist.output, species=species),
+
+
+rule cluster_all:
+    input:
+        expand(rules.cluster_ST.output, species=species),
+        expand(rules.cluster_hdbscan.output, species=species),

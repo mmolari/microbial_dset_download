@@ -1,10 +1,32 @@
+local-cores: 1
 cores: 1
 use-conda: true
 conda-frontend: mamba
 executor: "slurm"
 latency-wait: 60
-jobs: 20
+jobs: 15
 default-resources:
   mem_mb: 5000
   slurm_extra: "'--qos=6hours'"
   runtime: 350m
+set-resources:
+  mash_triangle:
+    cpus_per_task: 4
+  cluster_hdbscan:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  cluster_ST:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  plot_mash_dist:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  plot_tree:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  plot_metadata_overview:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  refine_tree:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m

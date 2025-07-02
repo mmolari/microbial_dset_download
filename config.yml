@@ -27,19 +27,20 @@ mlst_scheme:
   vcholerae: "vcholerae"
   senterica: "senterica_achtman_2"
 
-clustering_thresholds:
-  ecoli: 0.005
-  saureus: 0.005
-  hpylori: 0.005
-  spneumoniae: 0.005
-  kpneumoniae: 0.005
-  mtuberculosis: 0.005
-  bpertussis: 0.005
-  paeruginosa: 0.005
-  spyogenes: 0.005
-  sflexneri: 0.005
-  vcholerae: 0.005
-  senterica: 0.005
+clustering:
+  hdbscan_eps_threshold:
+    ecoli: 0.0035
+    saureus: 0.0015
+    hpylori: 0.001
+    spneumoniae: 0.001
+    kpneumoniae: 0.002
+    mtuberculosis: 0.0002
+    bpertussis: 0.001
+    paeruginosa: 0.002
+    spyogenes: 0.002
+    sflexneri: 0.005
+    vcholerae: 0.001
+    senterica: 0.001
 
 metadata:
   - accession
