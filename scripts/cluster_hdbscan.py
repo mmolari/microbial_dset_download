@@ -367,28 +367,48 @@ def summary_stats(
     for st, (ct, tot) in st_dict.items():
         if ct / tot > assignment_threshold:
             st_included.append(st)
-        if ct / len(isolates) > assignment_threshold:
-            st_assignment = st
-    st_majority = mlst_cluster.index[0] if len(mlst_cluster) > 0 else ""
-    # frequency of the most common ST in the cluster
-    st_max_freq = mlst_cluster.max() if len(mlst_cluster) > 0 else 0
-    st_max_freq /= len(isolates)
 
     summary_stats = {
         "num_isolates": len(isolates),
         "species": species,
         "mash_dist_avg": mash.mean(),
         "mash_dist_std": mash.std(),
-        "ST_assignment": st_assignment,  # single ST assigned to the cluster
+        "ST_n_different": len(mlst_cluster),  # number of different STs in the cluster
         "ST_included": st_included,  # list of STs included in the cluster
         "ST_all": st_dict,  # dictionary of STs with counts in the cluster and total
-        "ST_majority": st_majority,  # most frequent ST in the cluster
-        "ST_max_freq": st_max_freq,  # frequency of the most common ST in the cluster
-        "ST_n_different": len(mlst_cluster),  # number of different STs in the cluster
         "ST_n_isolates_with_type": int(
             mlst_cluster.sum()
         ),  # number of isolates with STs in the cluster
     }
+    # if there is a ST_majority, add precision and recall
+    if len(mlst_cluster) > 0:
+        st_majority = mlst_cluster.idxmax()  # most common ST in the cluster
+        # frequency of the most common ST in the cluster
+        st_max_freq = mlst_cluster.max() / len(isolates)
+
+        focal_st_counts = st_dict[st_majority]
+        precision = focal_st_counts[0] / len(isolates)
+        recall = focal_st_counts[0] / focal_st_counts[1]
+        if precision > assignment_threshold and recall > assignment_threshold:
+            st_assignment = st_majority
+        else:
+            st_assignment = None
+        added_stats = {
+            "ST_most_common": st_majority,  # most common ST in the cluster
+            "ST_most_common_freq": st_max_freq,  # frequency of the most common ST in the cluster
+            "ST_assignment": st_assignment,  # ST assignment based on frequency threshold
+            "precision": precision,  # precision of the ST assignment
+            "recall": recall,  # recall of the ST assignment
+        }
+    else:
+        added_stats = {
+            "ST_most_common": None,
+            "ST_most_common_freq": 0.0,
+            "precision": None,
+            "recall": None,
+            "ST_assignment": None,
+        }
+    summary_stats.update(added_stats)
     return summary_stats
 
 

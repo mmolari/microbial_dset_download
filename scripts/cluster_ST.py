@@ -208,7 +208,8 @@ def save_results(clade_root, info, mash_dist, svfld, ST, species):
         "ST": ST,
         "n_isolates": len(iso_names),
         "n_ST_isolates": int(clade_MLST_counts[ST]),
-        "ST_completeness": clade_MLST_counts[ST] / all_MLST_counts[ST],
+        "precision": clade_MLST_counts[ST] / len(iso_names),
+        "recall": clade_MLST_counts[ST] / all_MLST_counts[ST],
         "ST_all": {
             st: (int(ct), int(all_MLST_counts[st]))
             for st, ct in clade_MLST_counts.items()
