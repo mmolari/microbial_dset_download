@@ -333,7 +333,7 @@ rule cluster_hdbscan:
     params:
         eps=lambda w: config["clustering"]["hdbscan_eps_threshold"][w.species],
         thr_size=20,
-        assignment_threshold_freq=0.80,
+        assignment_threshold_freq=0.60,
     conda:
         "envs/bioinfo.yml"
     shell:
