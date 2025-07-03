@@ -304,3 +304,107 @@ plt.savefig("figs/f06_clustering_overview_hdbscan_precision_recall.png", dpi=300
 plt.show()
 
 # %%
+
+
+# parse all files clusters/mtuberculosis/hdbscan_clusters/clustering_results.json
+def parse_hdbscan_summary(base_dir, subfolder):
+    """
+    Parse HDBSCAN summary JSON files for all species.
+    """
+    results = {}
+
+    # Get all species directories
+    base_path = Path(base_dir)
+    if not base_path.exists():
+        print(f"Base directory {base_dir} does not exist")
+        return results
+
+    for species_dir in base_path.iterdir():
+        if species_dir.is_dir():
+            species = species_dir.name
+            results[species] = {}
+
+            # Look for HDBSCAN summary directory
+            summary_dir = species_dir / subfolder
+            if summary_dir.exists():
+                # Parse all summary JSON files
+                for json_file in summary_dir.glob("clustering_results.json"):
+                    try:
+                        with open(json_file, "r") as f:
+                            data = json.load(f)
+                        results[species] = data
+                        print(f"Parsed {species}/clustering_results.json")
+                    except Exception as e:
+                        print(f"Error parsing {json_file}: {e}")
+
+    return pd.DataFrame.from_dict(results, orient="index")
+
+
+sdf = parse_hdbscan_summary("../clusters", "hdbscan_clusters")
+sdf["species"] = sdf.index
+sdf.sort_values("num_samples", ascending=False, inplace=True)
+
+# %%
+# Barplot for NMI
+sns.barplot(
+    data=sdf,
+    y="species",
+    x="nmi",
+    hue="num_clusters",
+)
+plt.xlabel("NMI")
+plt.title("NMI by Species and Number of Clusters")
+plt.tight_layout()
+plt.show()
+
+# Barplot for ARI
+sns.barplot(
+    data=sdf,
+    y="species",
+    x="ari",
+    hue="num_clusters",
+)
+plt.xlabel("ARI")
+plt.title("ARI by Species and Number of Clusters")
+plt.tight_layout()
+plt.show()
+
+# %%
+# create a well-formatted copy of sdf
+
+sp_name_map = {
+    "ecoli": "E. coli",
+    "kpneumoniae": "K. pneumoniae",
+    "senterica": "S. enterica",
+    "saureus": "S. aureus",
+    "paeruginosa": "P. aeruginosa",
+    "bpertussis": "B. pertussis",
+    "mtuberculosis": "M. tuberculosis",
+    "hpylori": "H. pylori",
+    "spyogenes": "S. pyogenes",
+    "spneumoniae": "S. pneumoniae",
+    "vcholerae": "V. cholerae",
+    "sflexneri": "S. flexneri",
+}
+fdf_species = sdf["species"].map(sp_name_map)
+fdf_cl = sdf["num_clusters"].astype(str) + " | " + sdf["num_mlst"].astype(str)
+fdf_iso = sdf["num_samples"].astype(str)
+fdf_niso = (
+    sdf["num_samples_in_clusters"].astype(str)
+    + " | "
+    + sdf["num_samples_in_mlst"].astype(str)
+)
+
+fdf = pd.DataFrame(
+    {
+        "Species": fdf_species,
+        "NMI": sdf["nmi"],
+        "ARI": sdf["ari"],
+        "Clusters|STs": fdf_cl,
+        "Isolates": fdf_iso,
+        "Isolates in Clusters|STs": fdf_niso,
+    }
+)
+print(fdf.to_markdown())
+
+# %%
