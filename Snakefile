@@ -351,6 +351,34 @@ rule cluster_hdbscan:
         """
 
 
+rule export_compress_sequences:
+    input:
+        rules.chromosome_fa.output,
+    output:
+        "export/{species}/sequences.tar.xz",
+    shell:
+        """
+        tar -cJf {output} -C {input} .
+        """
+
+
+rule export_metadata:
+    input:
+        mtd=rules.combine_metadata.output,
+        tree=rules.refine_tree.output,
+        mash=rules.mash_triangle.output,
+    output:
+        mtd="export/{species}/metadata.csv",
+        tree="export/{species}/tree.nwk",
+        mash="export/{species}/mash_triangle.tsv.xz",
+    shell:
+        """
+        cp {input.mtd} {output.mtd}
+        cp {input.tree} {output.tree}
+        xz -c {input.mash} > {output.mash}
+        """
+
+
 rule clean:
     shell:
         """
@@ -372,3 +400,9 @@ rule cluster_all:
     input:
         expand(rules.cluster_ST.output, species=species),
         expand(rules.cluster_hdbscan.output, species=species),
+
+
+rule export_all:
+    input:
+        expand(rules.export_compress_sequences.output, species=species),
+        expand(rules.export_metadata.output, species=species),
