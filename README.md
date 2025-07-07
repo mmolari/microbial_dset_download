@@ -11,6 +11,9 @@ Given a series of species, to be specified in the `config.yml` file, the pipelin
 - optionally, by running the `cluster_all` target, clusters genomes creating clades of closely related isolates with two methods:
   - selecting internal nodes of the approximate phylogenetic tree that are associated to a particular Sequence Type.
   - clustering the genomes using HDBSCAN on the mash distances, picking a threshold parameter that makes the clustering compatible with the MLST scheme used.
+- optionally, running the `export_all` target creates an `export` directory with:
+  - for each species, a directory with the compressed genomes, the metadata table, the phylogenetic tree, MLST results, compressed mash distances, anb the HDBSCAN clustering results.
+  - and a global `all_clusters.yaml` file with a list of all cluster names per species.
 
 ## setup
 
@@ -51,4 +54,4 @@ Or for SLURM cluster execution:
 snakemake all --profile profiles/slurm
 ```
 
-Substitute `all` with `cluster_all` to run the clustering step, which will create a directory `clusters/` with the clustering results.
+Substitute `all` with `cluster_all` to run the clustering step, which will create a directory `clusters/` with the clustering results, or with `export_all` to create the `export` directory with all the results.
