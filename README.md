@@ -55,3 +55,36 @@ snakemake all --profile profiles/slurm
 ```
 
 Substitute `all` with `cluster_all` to run the clustering step, which will create a directory `clusters/` with the clustering results, or with `export_all` to create the `export` directory with all the results.
+
+## Export output
+
+When the `export_all` target is run, the following directory structure is created:
+
+```
+export/
+├── all_clusters.yaml
+├── ecoli
+│   ├── clusters.json
+│   ├── clusters.yaml
+│   ├── mash_triangle.tsv.xz
+│   ├── metadata.csv
+│   ├── sequences.tar.xz
+│   └── tree.nwk
+...
+└── hpylori
+    ├── clusters.json
+    ├── clusters.yaml
+    ├── mash_triangle.tsv.xz
+    ├── metadata.csv
+    ├── sequences.tar.xz
+    └── tree.nwk
+```
+
+Files are:
+- `sequences.tar.xz`: compressed tarball with the genomes (only chromosomes) in FASTA format.
+- `metadata.csv`: metadata table with the genomes, including the MLST results.
+- `tree.nwk`: approximate phylogenetic tree in Newick format, computed from the mash distances.
+- `mash_triangle.tsv.xz`: compressed mash distances in triangle format.
+- `clusters.yaml`: YAML file containing the dictionary `{sp_name: [cluster_name1, cluster_name2, ...]}` with the clusters for each species.
+- `clusters.json`: JSON with information for each cluster: size, list of isolates, diversity...
+- `all_clusters.yaml`: YAML file consisting of the concatenation of all `clusters.yaml` files for each species.
