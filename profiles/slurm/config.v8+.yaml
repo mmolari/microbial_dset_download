@@ -30,3 +30,10 @@ set-resources:
   refine_tree:
     slurm_extra: "'--qos=30min'"
     runtime: 29m
+  extract_clusters:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  concatenate_clusters:
+    slurm_extra: "'--qos=30min'"
+    runtime: 29m
+  

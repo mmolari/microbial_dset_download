@@ -351,6 +351,34 @@ rule cluster_hdbscan:
         """
 
 
+rule extract_clusters:
+    input:
+        rules.cluster_hdbscan.output.clusters,
+    output:
+        json="export/{species}/clusters.json",
+        yaml="export/{species}/clusters.yaml",
+    conda:
+        "envs/bioinfo.yml"
+    shell:
+        """
+        python3 scripts/extract_clusters.py \
+            --cl-folder {input} \
+            --cl-json {output.json} \
+            --cl-yaml {output.yaml}
+        """
+
+
+rule concatenate_clusters:
+    input:
+        expand(rules.extract_clusters.output.yaml, species=species),
+    output:
+        "export/all_clusters.yaml",
+    shell:
+        """
+        cat {input} > {output}
+        """
+
+
 rule export_compress_sequences:
     input:
         rules.chromosome_fa.output,
@@ -406,3 +434,5 @@ rule export_all:
     input:
         expand(rules.export_compress_sequences.output, species=species),
         expand(rules.export_metadata.output, species=species),
+        expand(rules.extract_clusters.output, species=species),
+        rules.concatenate_clusters.output,
